@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embed builder | Pulsar</title>
+<meta name="description" content="Build a Yapper embed card, watch it render, and copy the exact p!embed command. Runs entirely in your browser.">
+<link rel="icon" href="../../pulsar-avatar.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --ink:#f5f5f6; --ink-2:#a6a6ad; --ink-3:#8b8b92;
+  --line:rgba(255,255,255,.10); --line-2:rgba(255,255,255,.055);
+  --surface:rgba(255,255,255,.028); --surface-2:rgba(255,255,255,.055);
+  --ok:#7ee2b8; --bad:#f79b9b; --warn:#f5cf8a;
+  --r-md:16px; --r-lg:22px; --r-full:999px;
+  --maxw:1180px; --ease:cubic-bezier(.16,1,.3,1);
+  --font-display:"Outfit","Inter",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--font-body);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(900px 520px at 50% -180px,rgba(255,255,255,.06),transparent 70%),
+             radial-gradient(620px 460px at 4% 12%,rgba(255,255,255,.02),transparent 62%);
+}
+::selection{background:#fff;color:#0a0a0b}
+:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:6px}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button{font:inherit;color:inherit}
+*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border:3px solid var(--bg);border-radius:99px}
+
+.wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 24px;position:relative;z-index:2}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:fixed;top:12px;left:12px;z-index:200;transform:translateY(-200%);background:#fff;color:#0a0a0b;padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px}
+.skip:focus{transform:none}
+
+h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:-0.03em;line-height:1.04;margin:0}
+.mono{font-family:var(--font-mono);font-weight:500;letter-spacing:.02em}
+.muted{color:var(--ink-3)}
+
+.top{border-bottom:1px solid var(--line-2);position:sticky;top:0;z-index:50;background:rgba(10,10,11,.78);backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px)}
+.top-in{display:flex;align-items:center;gap:14px;height:64px}
+.brand{display:flex;align-items:center;gap:11px;font-family:var(--font-display);font-weight:700;font-size:1.04rem;letter-spacing:-0.02em}
+.brand .mark{width:32px;height:32px;border-radius:9px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2);flex:none}
+.brand .mark img{width:100%;height:100%;object-fit:cover}
+.bot-pill{font-family:var(--font-mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;background:#fff;color:#0a0a0b;border-radius:4px;padding:.12rem .32rem}
+.top-nav{margin-left:auto;display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.top-nav a{padding:.46rem .76rem;border-radius:var(--r-full);font-size:.88rem;color:var(--ink-2);transition:color .25s,background .25s}
+.top-nav a:hover{color:var(--ink);background:var(--surface)}
+.top-nav a.on{color:var(--ink);background:var(--surface-2)}
+.top-nav a.back{color:var(--ink-3)}
+@media (max-width:640px){
+  .top-in{height:auto;min-height:60px;padding-block:8px;flex-wrap:wrap}
+  .top-nav{width:100%;justify-content:flex-start;margin-left:0}
+  .top-nav a{padding:.4rem .54rem;font-size:.82rem}
+  .brand span.bot-pill{display:none}
+  .hero{padding-left:18px;padding-right:18px}
+}
+
+.hero{padding:clamp(44px,7vw,76px) 24px 10px}
+.eyebrow{display:inline-flex;align-items:center;gap:.55rem;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.eyebrow .sig{width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}70%{box-shadow:0 0 0 9px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+.hero h1{font-size:clamp(2.1rem,5vw,3.4rem);letter-spacing:-0.04em;margin-top:16px}
+.hero p{margin-top:18px;color:var(--ink-2);max-width:72ch;font-size:clamp(1rem,1.4vw,1.12rem)}
+.hero p a{border-bottom:1px solid var(--line);color:var(--ink)}
+
+main{padding:38px 0 80px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:960px){.grid{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:clamp(20px,2.6vw,26px);position:relative}
+.card + .card{margin-top:16px}
+.card h2{font-size:1.06rem;letter-spacing:-0.02em;display:flex;align-items:center;gap:10px}
+.card h2 .n{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.12em;color:var(--ink-3);border:1px solid var(--line-2);border-radius:5px;padding:.14rem .38rem}
+.hint{margin-top:7px;color:var(--ink-3);font-size:.86rem;max-width:64ch}
+label{display:block;margin:15px 0 6px;font-family:var(--font-mono);font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+input[type=text],textarea{
+  width:100%;background:rgba(0,0,0,.28);border:1px solid var(--line);color:var(--ink);
+  border-radius:12px;padding:10px 13px;font:inherit;font-size:.94rem;outline:none;
+  transition:border-color .25s,background .25s;
+}
+textarea{min-height:104px;resize:vertical;line-height:1.6}
+input[type=text]:focus,textarea:focus{border-color:rgba(255,255,255,.32);background:rgba(0,0,0,.38)}
+input::placeholder,textarea::placeholder{color:var(--ink-3)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.row{grid-template-columns:1fr}}
+.counter{margin-top:4px;text-align:right;font-family:var(--font-mono);font-size:.68rem;color:var(--ink-3)}
+.counter.over{color:var(--bad)}
+.color-row{display:flex;gap:9px;align-items:center}
+.color-row input[type=color]{width:48px;height:41px;padding:3px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.28);cursor:pointer;flex:none}
+.color-row input[type=text]{flex:1}
+
+.fields{display:grid;gap:9px}
+.field-row{display:grid;grid-template-columns:1fr 1.6fr auto auto;gap:8px;align-items:center;
+  background:rgba(0,0,0,.24);border:1px solid var(--line-2);border-radius:11px;padding:7px}
+.field-row input[type=text]{background:transparent;border:0;padding:5px 6px;font-size:.86rem}
+.field-row input[type=text]:focus{background:rgba(0,0,0,.3);border-radius:7px}
+.field-row .inline{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.field-row .inline input{accent-color:#fff}
+.field-row .del{border:1px solid var(--line-2);background:transparent;color:var(--ink-3);border-radius:7px;
+  width:26px;height:26px;display:grid;place-items:center;cursor:pointer;font-size:.8rem}
+.field-row .del:hover{color:var(--bad);border-color:rgba(247,155,155,.5)}
+@media (max-width:600px){.field-row{grid-template-columns:1fr auto auto;grid-template-areas:"n n n" "v v d"}.field-row .fname{grid-area:n}.field-row .fvalue{grid-area:v}.field-row .inline{grid-area:auto}.field-row .del{grid-area:d;justify-self:end}}
+
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:.7rem 1.1rem;border-radius:var(--r-full);
+  border:1px solid transparent;font-weight:600;font-size:.9rem;cursor:pointer;
+  transition:transform .3s var(--ease),background .3s,border-color .3s,box-shadow .3s}
+.btn svg{width:16px;height:16px;flex:none}
+.btn-primary{background:#fff;color:#0a0a0b}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 30px -12px rgba(255,255,255,.5)}
+.btn-ghost{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.btn-ghost:hover{background:var(--surface-2);border-color:rgba(255,255,255,.24)}
+
+.status{min-height:22px;margin-top:12px;font-size:.83rem;color:var(--ink-3);line-height:1.5}
+.status.good{color:var(--ok)}
+.status.bad{color:var(--bad)}
+.status.warn{color:var(--warn)}
+
+.preview-wrap{border:1px solid var(--line);border-radius:var(--r-md);background:rgba(0,0,0,.32);padding:16px;min-height:190px}
+.preview-empty{color:var(--ink-3);font-size:.88rem;padding:34px 0;text-align:center}
+.embed{background:#1a1d25;border-left:4px solid #eaeaea;border-radius:8px;padding:14px 16px;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px}
+.embed .author{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;margin-bottom:7px}
+.embed .author img{width:20px;height:20px;border-radius:50%;object-fit:cover}
+.embed .title{font-weight:700;font-size:1rem;margin-bottom:5px}
+.embed .title a{color:#c9c9d4;border-bottom:1px solid rgba(255,255,255,.25)}
+.embed .desc{white-space:pre-wrap;word-break:break-word;color:#d7dae3;font-size:.88rem;line-height:1.58}
+.embed .fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.embed .field{min-width:0}
+.embed .field .fname{font-size:.76rem;font-weight:700;margin-bottom:2px;color:#eef0f5}
+.embed .field .fval{font-size:.8rem;color:#c3c7d2;white-space:pre-wrap;word-break:break-word}
+.embed .field.full{grid-column:1/-1}
+.embed .imgs{width:132px;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.embed .imgs img{max-width:132px;border-radius:6px}
+.embed .footer{margin-top:12px;color:#9aa0b0;font-size:.72rem;display:flex;align-items:center;gap:6px}
+.embed .footer img{width:16px;height:16px;border-radius:50%}
+
+.out-lbl{display:flex;align-items:center;gap:9px;margin:16px 0 6px;font-family:var(--font-mono);
+  font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+.copy-mini{margin-left:auto;border:1px solid var(--line);background:transparent;color:var(--ink-3);
+  font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:var(--r-full);padding:.24rem .56rem;cursor:pointer}
+.copy-mini:hover{color:var(--ink);border-color:rgba(255,255,255,.3)}
+.out{border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.4);
+  padding:13px 14px;font-family:var(--font-mono);font-size:.76rem;line-height:1.62;color:var(--ink);
+  white-space:pre-wrap;word-break:break-word;max-height:220px;overflow:auto;user-select:all}
+
+details{margin-top:16px;border-top:1px solid var(--line-2);padding-top:13px}
+summary{cursor:pointer;color:var(--ink-3);font-size:.84rem}
+summary:hover{color:var(--ink-2)}
+details p{margin-top:10px;color:var(--ink-2);font-size:.83rem}
+details a{border-bottom:1px solid var(--line);color:var(--ink)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);z-index:150;
+  background:#fff;color:#0a0a0b;padding:11px 18px;border-radius:var(--r-full);font-weight:600;font-size:.88rem;
+  display:flex;align-items:center;gap:9px;box-shadow:0 20px 50px -18px rgba(0,0,0,.9);
+  transition:transform .5s var(--ease)}
+.toast.show{transform:translate(-50%,0)}
+.toast svg{width:16px;height:16px}
+
+.foot{border-top:1px solid var(--line-2);padding:34px 0 44px;color:var(--ink-3);font-size:.8rem;position:relative;z-index:2}
+.foot-in{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+.foot a{border-bottom:1px solid var(--line);color:var(--ink-2)}
+.foot a:hover{color:#fff}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="../../">
+      <span class="mark"><img src="../../pulsar-avatar.png" alt=""></span>
+      Pulsar <span class="bot-pill">Bot</span>
+    </a>
+    <nav class="top-nav" aria-label="Breadcrumb">
+      <a href="../custom-command-builder/">Command builder</a>
+      <a class="on" href="./" aria-current="page">Embed builder</a>
+      <a class="back" href="../">&larr; Pulsar</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <span class="eyebrow"><span class="sig" aria-hidden="true"></span>Pulsar · no dashboard</span>
+  <h1>Embed builder</h1>
+  <p>Build the card, watch it render, copy one command. Nothing leaves this page: there is no dashboard, no account and no request behind it. Yapper allows five cards and ten fields each; the builder keeps to those limits, and to the picture hosts it serves.</p>
+</div>
+
+<main id="main">
+  <div class="wrap grid">
+    <section class="card">
+      <h2><span class="n">01</span>The card</h2>
+      <p class="hint">A title, a description or a field is required. Empty boxes are left out of the payload rather than sent blank.</p>
+
+      <label for="title">Title</label>
+      <input id="title" type="text" maxlength="256" placeholder="🎮 Game night" autocomplete="off">
+      <div class="counter"><span id="titleCount">0</span> / 256</div>
+
+      <label for="description">Description</label>
+      <textarea id="description" maxlength="4096" placeholder="Friday at 20:00 UTC. Bring a friend."></textarea>
+      <div class="counter"><span id="descCount">0</span> / 4,096</div>
+
+      <div class="row">
+        <div>
+          <label for="url">Title link <span class="muted" style="text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="url" type="text" placeholder="https://example.com" autocomplete="off" spellcheck="false">
+        </div>
+        <div>
+          <label for="authorName">Author name</label>
+          <input id="authorName" type="text" maxlength="256" placeholder="Pulsar" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="authorIcon">Author icon URL</label>
+          <input id="authorIcon" type="text" placeholder="https://…" autocomplete="off" spellcheck="false">
+        </div>
+        <div>
+          <label for="footerText">Footer</label>
+          <input id="footerText" type="text" maxlength="2048" placeholder="Pulsar · every Friday" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="thumbnail">Thumbnail URL</label>
+          <input id="thumbnail" type="text" placeholder="https://…" autocomplete="off" spellcheck="false">
+        </div>
+        <div>
+          <label for="image">Image URL</label>
+          <input id="image" type="text" placeholder="https://…" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="footerIcon">Footer icon URL</label>
+          <input id="footerIcon" type="text" placeholder="https://…" autocomplete="off" spellcheck="false">
+        </div>
+        <div>
+          <label for="color">Colour</label>
+          <div class="color-row">
+            <input id="colorPicker" type="color" value="#8b7cf6" aria-label="Colour picker">
+            <input id="color" type="text" value="#8b7cf6" maxlength="7" autocomplete="off" spellcheck="false" aria-label="Colour hex">
+          </div>
+        </div>
+      </div>
+
+      <label style="margin-top:18px">Fields <span class="muted" style="text-transform:none;letter-spacing:0">(up to 10)</span></label>
+      <div class="fields" id="fields"></div>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn btn-ghost" id="addField" type="button">+ Add a field</button>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="copy" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.4"/><path d="M5.5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v.5"/></svg>
+          Copy the command
+        </button>
+        <button class="btn btn-ghost" id="example" type="button">Load an example</button>
+        <button class="btn btn-ghost" id="reset" type="button">Clear</button>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+
+      <details>
+        <summary>Pictures, limits and what it asks of you</summary>
+        <p>Needs <b style="color:var(--ink);font-weight:500">Manage messages</b> in the channel you post it in.</p>
+        <p>Pictures must be https links from a host Yapper serves: imgur, Tenor, Giphy, YouTube, Twitch, Spotify, Reddit, X, GitHub, Wikimedia, AniList, MyAnimeList, nekos.best, cdn.weeb.sh, a Yapper upload, or the Yapper website.</p>
+        <p>Five cards and 6,000 characters across a whole message; this page builds one card. To post several, paste the JSON as an array — <a href="../#commands">see <span class="mono">p!embed</span></a>.</p>
+      </details>
+    </section>
+
+    <div>
+      <section class="card">
+        <h2><span class="n">02</span>Preview</h2>
+        <p class="hint">Close to how Yapper draws it. The colour is the bar down the left.</p>
+        <div class="preview-wrap" id="preview">
+          <div class="preview-empty">The card appears here as you type.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2><span class="n">03</span>Paste this in Pulsar</h2>
+        <p class="hint">One line, exactly what the command sends.</p>
+        <div class="out-lbl">The command
+          <button class="copy-mini" id="copyJson" type="button">Copy JSON</button>
+        </div>
+        <div class="out" id="output"></div>
+        <div class="status" id="copyStatus" role="status" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <span>Yapper draws the card; the numbers come from the bot's own embed limits.</span>
+    <span class="mono">Nothing leaves this page.</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
+  <span id="toastMsg">Copied</span>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* The hosts isEmbeddableImage() accepts, plus the Yapper website and its
+     upload bucket. Anything else is refused by the API, so it is refused here
+     first, with the reason. */
+  var IMAGE_HOSTS = [
+    "i.imgur.com", "media.tenor.com", "media.giphy.com", "i.giphy.com",
+    "upload.wikimedia.org", "raw.githubusercontent.com", "avatars.githubusercontent.com",
+    "user-images.githubusercontent.com", "i.ytimg.com", "cdn.discordapp.com",
+    "media.discordapp.net", "pbs.twimg.com", "i.redd.it", "static-cdn.jtvnw.net",
+    "i.scdn.co", "s4.anilist.co", "cdn.myanimelist.net", "nekos.best", "cdn.weeb.sh"
+  ];
+
+  var LIMITS = {
+    title: 256, description: 4096, fieldName: 256, fieldValue: 1024,
+    footer: 2048, author: 256, fields: 10, chars: 6000
+  };
+
+  var $ = function(id){ return document.getElementById(id); };
+  var status = $("status");
+  var copyStatus = $("copyStatus");
+  var preview = $("preview");
+  var output = $("output");
+  var fieldsBox = $("fields");
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(ch){
+      return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch];
+    });
+  }
+
+  function hostOf(value){
+    try{
+      var parsed = new URL(String(value));
+      return { host: parsed.hostname.toLowerCase(), https: parsed.protocol === "https:" };
+    }catch(e){ return null; }
+  }
+
+  function pictureOk(value){
+    if(!value) return true;
+    var parsed = hostOf(value);
+    if(!parsed || !parsed.https) return false;
+    return IMAGE_HOSTS.indexOf(parsed.host) !== -1 ||
+      parsed.host === "yapper.website" || /\.yapper\.website$/.test(parsed.host) ||
+      /^pub-[a-z0-9]+\.r2\.dev$/.test(parsed.host);
+  }
+
+  function colorOk(value){ return /^#[0-9a-f]{6}$/i.test(String(value || "").trim()); }
+
+  function addFieldRow(name, value, inline){
+    if(fieldsBox.children.length >= LIMITS.fields) return;
+    var row = document.createElement("div");
+    row.className = "field-row";
+    row.innerHTML =
+      '<input type="text" class="fname" maxlength="256" placeholder="Label">' +
+      '<input type="text" class="fvalue" maxlength="1024" placeholder="Value">' +
+      '<label class="inline"><input type="checkbox" class="finline"> inline</label>' +
+      '<button class="del" type="button" title="Remove this field" aria-label="Remove this field">✕</button>';
+    row.querySelector(".fname").value = name || "";
+    row.querySelector(".fvalue").value = value || "";
+    row.querySelector(".finline").checked = Boolean(inline);
+    row.querySelector(".del").addEventListener("click", function(){ row.remove(); update(); });
+    row.querySelectorAll("input").forEach(function(input){ input.addEventListener("input", update); });
+    fieldsBox.appendChild(row);
+  }
+
+  function collectFields(){
+    return [].slice.call(fieldsBox.querySelectorAll(".field-row")).map(function(row){
+      return {
+        name: row.querySelector(".fname").value.trim(),
+        value: row.querySelector(".fvalue").value.trim(),
+        inline: row.querySelector(".finline").checked
+      };
+    }).filter(function(field){ return field.name || field.value; });
+  }
+
+  function build(){
+    var card = {};
+    var title = $("title").value.trim();
+    var description = $("description").value.trim();
+    var url = $("url").value.trim();
+    var color = $("color").value.trim().toLowerCase();
+
+    if(title) card.title = title;
+    if(description) card.description = description;
+    if(url && /^https?:\/\//i.test(url)) card.url = url;
+    if(colorOk(color)) card.color = color;
+
+    var authorName = $("authorName").value.trim();
+    var authorIcon = $("authorIcon").value.trim();
+    if(authorName){
+      card.author = { name: authorName };
+      if(authorIcon) card.author.icon_url = authorIcon;
+    }
+
+    var footerText = $("footerText").value.trim();
+    var footerIcon = $("footerIcon").value.trim();
+    if(footerText){
+      card.footer = { text: footerText };
+      if(footerIcon) card.footer.icon_url = footerIcon;
+    }
+
+    var thumbnail = $("thumbnail").value.trim();
+    var image = $("image").value.trim();
+    if(thumbnail) card.thumbnail = { url: thumbnail };
+    if(image) card.image = { url: image };
+
+    var fields = collectFields();
+    if(fields.length) card.fields = fields;
+
+    return card;
+  }
+
+  /* Yapper's own count: title, description, author name, footer and each field's
+     label plus value. The 6,000 budget is shared by every card on a message. */
+  function usedChars(card){
+    var total = (card.title || "").length + (card.description || "").length + ((card.author && card.author.name) || "").length;
+    total += (card.footer && card.footer.text || "").length;
+    (card.fields || []).forEach(function(field){ total += field.name.length + field.value.length; });
+    return total;
+  }
+
+  function renderPreview(card){
+    if(!Object.keys(card).length){
+      return '<div class="preview-empty">The card appears here as you type.</div>';
+    }
+
+    var accent = colorOk(card.color) ? card.color : "#eaeaea";
+    var fields = (card.fields || []).map(function(field){
+      return '<div class="field ' + (field.inline ? "" : "full") + '">' +
+        (field.name ? '<div class="fname">' + escapeHtml(field.name) + "</div>" : "") +
+        (field.value ? '<div class="fval">' + escapeHtml(field.value) + "</div>" : "") +
+      "</div>";
+    }).join("");
+
+    var pictures = [card.thumbnail && card.thumbnail.url, card.image && card.image.url].filter(Boolean).map(function(url){
+      return '<img src="' + escapeHtml(url) + '" alt="" onerror="this.style.display=\'none\'">';
+    }).join("");
+
+    return '<div class="embed" style="border-left-color:' + escapeHtml(accent) + '">' +
+      "<div>" +
+        (card.author && card.author.name
+          ? '<div class="author">' +
+            (card.author.icon_url ? '<img src="' + escapeHtml(card.author.icon_url) + '" alt="" onerror="this.remove()">' : "") +
+            escapeHtml(card.author.name) + "</div>"
+          : "") +
+        (card.title
+          ? '<div class="title">' + (card.url
+              ? '<a href="' + escapeHtml(card.url) + '" target="_blank" rel="noreferrer">' + escapeHtml(card.title) + "</a>"
+              : escapeHtml(card.title)) + "</div>"
+          : "") +
+        (card.description ? '<div class="desc">' + escapeHtml(card.description) + "</div>" : "") +
+        (fields ? '<div class="fields">' + fields + "</div>" : "") +
+        (card.footer && card.footer.text
+          ? '<div class="footer">' +
+            (card.footer.icon_url ? '<img src="' + escapeHtml(card.footer.icon_url) + '" alt="" onerror="this.remove()">' : "") +
+            escapeHtml(card.footer.text) + "</div>"
+          : "") +
+      "</div>" +
+      (pictures ? '<div class="imgs">' + pictures + "</div>" : "") +
+    "</div>";
+  }
+
+  function validate(card){
+    var problems = [];
+    var warnings = [];
+
+    if(!card.title && !card.description && !(card.fields && card.fields.length)){
+      problems.push("add a title, a description or a field");
+    }
+    if(card.title && card.title.length > LIMITS.title) problems.push("the title is over 256 characters");
+    if(card.description && card.description.length > LIMITS.description) problems.push("the description is over 4,096 characters");
+    if(card.fields && card.fields.length > LIMITS.fields) problems.push("there are more than ten fields");
+
+    (card.fields || []).forEach(function(field){
+      if(field.name.length > LIMITS.fieldName) problems.push("a field label is over 256 characters");
+      if(field.value.length > LIMITS.fieldValue) problems.push("a field value is over 1,024 characters");
+    });
+
+    [["thumbnail", card.thumbnail && card.thumbnail.url],
+     ["image", card.image && card.image.url],
+     ["author icon", card.author && card.author.icon_url],
+     ["footer icon", card.footer && card.footer.icon_url]].forEach(function(pair){
+      if(pair[1] && !pictureOk(pair[1])){
+        var parsed = hostOf(pair[1]);
+        problems.push(parsed && !parsed.https
+          ? "the " + pair[0] + " must be an https link"
+          : "the " + pair[0] + " host is not one Yapper serves");
+      }
+    });
+
+    if($("url").value.trim() && !/^https?:\/\//i.test($("url").value.trim())){
+      problems.push("the title link must start with http:// or https://");
+    }
+    if(!colorOk($("color").value)){
+      warnings.push("that colour is not #rrggbb, so the default grey is used");
+    }
+
+    var chars = usedChars(card);
+    if(chars > LIMITS.chars) problems.push(chars + " characters — " + (chars - LIMITS.chars) + " over the 6,000 budget");
+
+    if(problems.length){
+      status.className = "status bad";
+      status.textContent = "Fix: " + problems.join(" · ") + ".";
+    } else if(warnings.length){
+      status.className = "status warn";
+      status.textContent = "Ready — note: " + warnings.join(" · ") + ".";
+    } else {
+      status.className = "status good";
+      status.textContent = "Ready — " + chars + " of 6,000 characters used.";
+    }
+    return problems.length === 0;
+  }
+
+  function update(){
+    var card = build();
+    $("titleCount").textContent = String($("title").value.length);
+    $("descCount").textContent = String($("description").value.length);
+    preview.innerHTML = renderPreview(card);
+    output.textContent = "p!embed " + JSON.stringify(card);
+    validate(card);
+    save();
+  }
+
+  function save(){
+    try{
+      localStorage.setItem("pulsar.embedDraft", JSON.stringify({
+        title: $("title").value, description: $("description").value,
+        url: $("url").value, authorName: $("authorName").value,
+        authorIcon: $("authorIcon").value, footerText: $("footerText").value,
+        footerIcon: $("footerIcon").value, thumbnail: $("thumbnail").value,
+        image: $("image").value, color: $("color").value, fields: collectFields()
+      }));
+    }catch(e){ /* private mode: the page still works */ }
+  }
+
+  function load(){
+    try{
+      var draft = JSON.parse(localStorage.getItem("pulsar.embedDraft") || "null");
+      if(!draft) return false;
+      ["title", "description", "url", "authorName", "authorIcon", "footerText", "footerIcon", "thumbnail", "image", "color"].forEach(function(key){
+        if(draft[key]) $(key).value = draft[key];
+      });
+      $("colorPicker").value = colorOk(draft.color) ? draft.color : "#8b7cf6";
+      (draft.fields || []).forEach(function(field){ addFieldRow(field.name, field.value, field.inline); });
+      return true;
+    }catch(e){ return false; }
+  }
+
+  var toast = $("toast"), toastMsg = $("toastMsg"), toastTimer;
+  function showToast(msg){
+    toastMsg.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove("show"); }, 2100);
+  }
+
+  function copy(text, okMsg){
+    if(!text){ showToast("Nothing to copy yet"); return; }
+    function done(){ showToast(okMsg); }
+    function fallback(){
+      var t = document.createElement("textarea");
+      t.value = text;
+      t.setAttribute("readonly", "");
+      t.style.position = "absolute";
+      t.style.left = "-9999px";
+      document.body.appendChild(t);
+      t.select();
+      try{ if(document.execCommand("copy")) done(); else showToast("Copy failed — select it by hand"); }
+      catch(e){ showToast("Copy failed — select it by hand"); }
+      document.body.removeChild(t);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  }
+
+  ["title", "description", "url", "authorName", "authorIcon", "footerText", "footerIcon", "thumbnail", "image", "color"].forEach(function(id){
+    $(id).addEventListener("input", update);
+  });
+  $("colorPicker").addEventListener("input", function(){
+    $("color").value = $("colorPicker").value;
+    update();
+  });
+  $("color").addEventListener("input", function(){
+    if(colorOk($("color").value)) $("colorPicker").value = $("color").value;
+  });
+
+  $("addField").addEventListener("click", function(){
+    if(fieldsBox.children.length >= LIMITS.fields){
+      showToast("Ten fields is the platform's limit");
+      return;
+    }
+    addFieldRow();
+    update();
+  });
+
+  $("copy").addEventListener("click", function(){
+    var card = build();
+    if(!validate(card)){
+      copyStatus.className = "status bad";
+      copyStatus.textContent = "Fix the problem above first — Pulsar would refuse this payload.";
+      return;
+    }
+    copy("p!embed " + JSON.stringify(card), "Copied. Paste it into a channel where Pulsar can manage messages.");
+  });
+
+  $("copyJson").addEventListener("click", function(){
+    copy(JSON.stringify(build()), "Copied the JSON.");
+  });
+
+  $("example").addEventListener("click", function(){
+    $("title").value = "🎮 Game night";
+    $("description").value = "Friday at 20:00 UTC — bring a friend and a headset.";
+    $("authorName").value = "Pulsar";
+    $("footerText").value = "Every Friday · Pulsar HQ";
+    $("color").value = "#8b7cf6";
+    $("colorPicker").value = "#8b7cf6";
+    fieldsBox.innerHTML = "";
+    addFieldRow("When", "Friday, 20:00 UTC", true);
+    addFieldRow("Where", "Voice · Game Night", true);
+    addFieldRow("How to join", "React with 🎮 or just show up.", false);
+    update();
+  });
+
+  $("reset").addEventListener("click", function(){
+    ["title", "description", "url", "authorName", "authorIcon", "footerText", "footerIcon", "thumbnail", "image"].forEach(function(id){
+      $(id).value = "";
+    });
+    $("color").value = "#8b7cf6";
+    $("colorPicker").value = "#8b7cf6";
+    fieldsBox.innerHTML = "";
+    copyStatus.textContent = "";
+    update();
+  });
+
+  if(!load()) addFieldRow();
+  update();
+})();
+</script>
+</body>
+</html>
