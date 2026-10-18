@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hyperion | a brand-new Yapper community</title>
+<meta name="description" content="Hyperion is a brand-new Yapper community. Be here from the very beginning: Early Supporter role, the custom Pulsar bot, and a Minecraft server in the works.">
+<link rel="icon" href="server-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hyperion | a brand-new Yapper community">
+<meta property="og:description" content="Be here from the very beginning. Join before October 20 for the Early Supporter role.">
+<meta property="og:image" content="server-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+/* ============================================================
+   Hyperion — monochrome. Structure borrowed from norisk.gg,
+   world: near-black ground, white ink, hairline chrome.
+   ============================================================ */
+
+:root{
+  --bg:#0a0a0b;
+  --bg-elev:#0f0f11;
+  --ink:#f5f5f6;
+  --ink-2:#a6a6ad;
+  --ink-3:#8b8b92;
+  --line:rgba(255,255,255,.10);
+  --line-2:rgba(255,255,255,.055);
+  --surface:rgba(255,255,255,.028);
+  --surface-2:rgba(255,255,255,.055);
+  --white:#ffffff;
+  --r-sm:10px; --r-md:16px; --r-lg:22px; --r-xl:30px; --r-full:999px;
+  --maxw:1160px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --font-display:"Outfit","Inter",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.6;
+  letter-spacing:-0.005em;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+
+/* page ground: a single soft top glow + grain */
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(900px 520px at 50% -160px, rgba(255,255,255,.055), transparent 70%),
+    radial-gradient(700px 500px at 100% 8%, rgba(255,255,255,.02), transparent 60%);
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;
+}
+
+::selection{background:#fff;color:#0a0a0b}
+:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:6px}
+
+/* themed browser chrome */
+*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border:3px solid var(--bg);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3)}
+
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit}
+
+.wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+.skip{position:fixed;top:12px;left:12px;z-index:200;transform:translateY(-200%);
+  background:#fff;color:#0a0a0b;padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px}
+.skip:focus{transform:none}
+
+/* ---------- typography ---------- */
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;letter-spacing:-0.03em;line-height:1.02;margin:0}
+.display{
+  font-size:clamp(2.9rem,7.2vw,5.6rem);
+  font-weight:700;line-height:.98;letter-spacing:-0.04em;
+}
+.h2{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.03}
+.h3{font-size:clamp(1.25rem,2.2vw,1.6rem);letter-spacing:-0.02em}
+.muted{color:var(--ink-3)}
+.lead{font-size:clamp(1.02rem,1.5vw,1.2rem);color:var(--ink-2);max-width:66ch}
+p{margin:0}
+
+.mono{font-family:var(--font-mono);font-weight:500;letter-spacing:.02em}
+.tag{
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3)
+}
+
+/* ---------- buttons ---------- */
+.btn{
+  --pad:.82rem 1.35rem;
+  display:inline-flex;align-items:center;gap:.6rem;
+  padding:var(--pad);border-radius:var(--r-full);
+  font-weight:600;font-size:.95rem;letter-spacing:-0.01em;
+  border:1px solid transparent;cursor:pointer;
+  transition:transform .35s var(--ease),background .3s var(--ease),border-color .3s var(--ease),color .3s var(--ease),box-shadow .35s var(--ease);
+  white-space:nowrap;
+}
+.btn svg{width:18px;height:18px;flex:none;transition:transform .35s var(--ease)}
+.btn-primary{background:#fff;color:#0a0a0b}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 30px -12px rgba(255,255,255,.55)}
+.btn-primary:hover svg{transform:translateX(3px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-ghost{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.btn-ghost:hover{background:var(--surface-2);border-color:rgba(255,255,255,.24);transform:translateY(-2px)}
+.btn-sm{--pad:.6rem 1.05rem;font-size:.9rem}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ---------- nav ---------- */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;transition:background .4s var(--ease),border-color .4s var(--ease),backdrop-filter .4s}
+.nav::after{content:"";position:absolute;inset:0;border-bottom:1px solid transparent;transition:border-color .4s var(--ease);pointer-events:none}
+.nav.scrolled{background:rgba(10,10,11,.72);backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px)}
+.nav.scrolled::after{border-color:var(--line-2)}
+.nav-in{display:flex;align-items:center;gap:14px;height:68px}
+.brand{display:flex;align-items:center;gap:11px;font-family:var(--font-display);font-weight:700;font-size:1.06rem;letter-spacing:-0.02em;position:relative;z-index:2}
+.brand .mark{width:34px;height:34px;border-radius:10px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line);position:relative;flex:none}
+.brand .mark img{width:100%;height:100%;object-fit:cover}
+.brand .mark .mono-fb{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:.95rem;color:var(--ink-2)}
+.brand .mark img.img-missing{display:none}
+.brand .mark:has(img:not(.img-missing)) .mono-fb{display:none}
+.nav-links{display:flex;align-items:center;gap:2px;margin-left:auto}
+.nav-links a{position:relative;padding:.5rem .8rem;border-radius:var(--r-full);font-size:.9rem;color:var(--ink-2);transition:color .25s,background .25s}
+.nav-links a:hover{color:var(--ink);background:var(--surface)}
+.nav-links a.active{color:var(--ink)}
+.nav-links a.active::after{content:"";position:absolute;left:50%;bottom:2px;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#fff}
+.nav-cta{margin-left:10px;position:relative;z-index:2}
+.nav-toggle{display:none;margin-left:auto;width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);align-items:center;justify-content:center}
+.nav-toggle svg{width:20px;height:20px}
+.mobile-menu{display:none}
+
+/* ---------- hero ---------- */
+.hero{position:relative;z-index:2;padding-top:150px;padding-bottom:40px;text-align:center}
+.hero .display .line{display:block;overflow:hidden}
+.hero .display .line > span{display:block;transform:translateY(105%);animation:rise 1.05s var(--ease) forwards}
+.hero .display .line:nth-child(2) > span{animation-delay:.08s}
+@keyframes rise{to{transform:translateY(0)}}
+.hero-sub{opacity:0;animation:fade .9s var(--ease) .45s forwards}
+.hero-cta{opacity:0;animation:fade .9s var(--ease) .6s forwards}
+.hero-proof{opacity:0;animation:fade .9s var(--ease) .75s forwards}
+.hero-visual{opacity:0;animation:rise-slow 1.2s var(--ease) .6s forwards}
+@keyframes fade{to{opacity:1}}
+@keyframes rise-slow{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+
+.hero-sub{margin:26px auto 0;max-width:60ch}
+.hero-cta{margin-top:34px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hero-proof{margin-top:22px;display:flex;gap:18px;justify-content:center;flex-wrap:wrap;align-items:center;color:var(--ink-3);font-size:.86rem}
+.hero-proof .dot-sep{width:4px;height:4px;border-radius:50%;background:var(--line)}
+.count-chip{
+  display:inline-flex;align-items:center;gap:.6rem;padding:.4rem .55rem .4rem .8rem;border-radius:var(--r-full);
+  border:1px solid var(--line);background:var(--surface);font-family:var(--font-mono);font-size:.82rem;color:var(--ink)
+}
+.count-chip .pulse{width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 0 0 rgba(255,255,255,.6);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}70%{box-shadow:0 0 0 9px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+.count-chip b{font-weight:500;color:var(--ink)}
+.count-chip .cd{color:var(--ink-3)}
+
+/* ---------- window mock ---------- */
+.hero-visual{margin-top:66px;position:relative}
+.window{
+  position:relative;border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.012));
+  box-shadow:0 40px 120px -50px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.06);
+  text-align:left;
+}
+.window::before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)}
+.win-bar{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--line-2);background:rgba(255,255,255,.018)}
+.win-dots{display:flex;gap:7px}
+.win-dots i{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.16)}
+.win-title{font-family:var(--font-mono);font-size:.78rem;color:var(--ink-3)}
+.win-search{margin-left:auto;flex:1;max-width:320px;height:30px;border-radius:var(--r-full);border:1px solid var(--line-2);background:rgba(255,255,255,.03);display:flex;align-items:center;padding:0 12px;color:var(--ink-3);font-size:.78rem}
+.win-body{display:grid;grid-template-columns:216px 1fr 210px;min-height:430px}
+
+.side{padding:16px 12px;border-right:1px solid var(--line-2);background:rgba(0,0,0,.14)}
+.side--right{border-right:0;border-left:1px solid var(--line-2)}
+.side-head{display:flex;align-items:center;gap:10px;padding:0 8px 14px}
+.side-head .mark{width:36px;height:36px;border-radius:11px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2);position:relative;flex:none}
+.side-head .mark img{width:100%;height:100%;object-fit:cover}
+.side-head .mark img.img-missing{display:none}
+.side-head .mark .mono-fb{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:.9rem;color:var(--ink-2)}
+.side-head .mark:has(img:not(.img-missing)) .mono-fb{display:none}
+.side-head .nm{font-family:var(--font-display);font-weight:600;font-size:.95rem;letter-spacing:-0.01em}
+.side-head .sub{font-size:.72rem;color:var(--ink-3);font-family:var(--font-mono)}
+.ch-group{margin-top:14px}
+.ch-group .gl{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);padding:0 8px;margin-bottom:6px}
+.ch{display:flex;align-items:center;gap:9px;padding:.42rem .55rem;border-radius:9px;font-size:.86rem;color:var(--ink-2)}
+.ch svg{width:15px;height:15px;color:var(--ink-3);flex:none}
+.ch.active{background:var(--surface-2);color:var(--ink)}
+.ch.active svg{color:var(--ink)}
+.ch .hash{font-family:var(--font-mono);color:var(--ink-3);font-size:.85rem}
+
+.chat{padding:20px 22px;display:flex;flex-direction:column;gap:16px;background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+.chat-head{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--line-2)}
+.chat-head .cname{font-family:var(--font-display);font-weight:600;letter-spacing:-0.01em}
+.chat-head .cdesc{font-size:.78rem;color:var(--ink-3)}
+.chat-head .topic{margin-left:auto;font-size:.74rem;color:var(--ink-3);font-family:var(--font-mono)}
+.msg{display:flex;gap:12px;align-items:flex-start}
+.ava{width:38px;height:38px;border-radius:50%;overflow:hidden;flex:none;border:1px solid var(--line);background:var(--surface-2);position:relative}
+.ava img{width:100%;height:100%;object-fit:cover}
+.ava img.img-missing{display:none}
+.ava .mono-fb{position:absolute;inset:0;display:grid;place-items:center;font-size:.82rem;font-weight:600;font-family:var(--font-display);color:var(--ink-2)}
+.ava:has(img:not(.img-missing)) .mono-fb{display:none}
+.msg .mbody{min-width:0}
+.msg .mhead{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.msg .mname{font-weight:600;font-size:.9rem}
+.msg .mtag{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:.15rem .4rem;border-radius:5px;border:1px solid var(--line);color:var(--ink-3)}
+.msg .mtag.bot{background:#fff;color:#0a0a0b;border-color:#fff}
+.msg .mtime{font-size:.68rem;color:var(--ink-3);font-family:var(--font-mono)}
+.msg .mtext{font-size:.9rem;color:var(--ink-2)}
+.msg .mtext .mention{color:var(--ink);background:var(--surface-2);padding:.05rem .3rem;border-radius:5px}
+.msg .mtext .chan{color:var(--ink);border-bottom:1px solid var(--line)}
+
+.mem-group .gl{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);padding:0 8px;margin:14px 0 6px}
+.mem{display:flex;align-items:center;gap:9px;padding:.34rem .55rem;border-radius:9px;font-size:.85rem;color:var(--ink-2)}
+.mem .ava{width:26px;height:26px;border-radius:50%}
+.mem .ava .mono-fb{font-size:.66rem}
+.mem .mdot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.28);flex:none;margin-left:auto}
+.mem.online .mdot{background:#fff}
+.mem .pill{font-family:var(--font-mono);font-size:.56rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:.08rem .32rem}
+.mem.off{opacity:.45}
+
+/* ---------- marquee ---------- */
+.marquee{position:relative;z-index:2;margin-top:70px;padding:22px 0;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);
+  mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);overflow:hidden}
+.marquee-track{display:flex;gap:14px;width:max-content;animation:slide 38s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+@keyframes slide{to{transform:translateX(-50%)}}
+.pill{display:inline-flex;align-items:center;gap:9px;padding:.5rem 1.05rem;border-radius:var(--r-full);border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-size:.86rem;white-space:nowrap}
+.pill svg{width:15px;height:15px;color:var(--ink-3)}
+
+/* ---------- sections ---------- */
+section{position:relative;z-index:2}
+.sec{padding:clamp(84px,11vw,150px) 0 0}
+.sec-head{max-width:760px}
+.sec-head .h2{margin-bottom:20px}
+.sec-head .lead{color:var(--ink-2)}
+
+/* ---------- bento offers ---------- */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:52px}
+.card{
+  position:relative;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);
+  padding:26px;overflow:hidden;
+  transition:border-color .45s var(--ease),background .45s var(--ease),transform .45s var(--ease);
+}
+.card:hover{border-color:rgba(255,255,255,.22);background:var(--surface-2);transform:translateY(-3px)}
+.card .ico{width:44px;height:44px;border-radius:13px;border:1px solid var(--line);background:rgba(255,255,255,.03);display:grid;place-items:center;margin-bottom:auto}
+.card .ico svg{width:22px;height:22px;color:var(--ink)}
+.card .card-ttl{margin-top:22px;font-family:var(--font-display);font-weight:600;font-size:1.22rem;letter-spacing:-0.02em}
+.card .card-txt{margin-top:9px;color:var(--ink-2);font-size:.94rem;max-width:52ch}
+.card .card-link{margin-top:18px;display:inline-flex;align-items:center;gap:7px;font-size:.88rem;color:var(--ink);font-weight:500}
+.card .card-link svg{width:15px;height:15px;transition:transform .35s var(--ease)}
+.card:hover .card-link svg{transform:translateX(3px)}
+
+.card--early{grid-column:span 4;display:flex;flex-direction:column}
+.card--pulsar{grid-column:span 2;grid-row:span 2;display:flex;flex-direction:column}
+.card--mc{grid-column:span 2}
+.card--lounge{grid-column:span 2}
+.card--early .cd-row{margin-top:24px;display:flex;gap:10px;flex-wrap:wrap}
+.cd-box{flex:1;min-width:74px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.2);padding:12px 10px;text-align:center}
+.cd-box b{display:block;font-family:var(--font-display);font-weight:700;font-size:1.7rem;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1}
+.cd-box span{display:block;margin-top:6px;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.card--pulsar .pulsar-top{display:flex;align-items:center;gap:12px;margin-bottom:auto}
+.card--pulsar .ava{width:46px;height:46px}
+.card .badge-soft{margin-top:14px;display:inline-flex;align-items:center;gap:7px;align-self:flex-start;padding:.32rem .7rem;border-radius:var(--r-full);border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:.75rem;color:var(--ink-2);font-family:var(--font-mono)}
+.card .kicker-stat{margin-top:24px;font-family:var(--font-mono);font-size:.78rem;color:var(--ink-3)}
+
+/* ---------- pulsar section ---------- */
+.pulsar-grid{display:grid;grid-template-columns:.92fr 1.08fr;gap:34px;margin-top:52px;align-items:start}
+.pulsar-card{border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;background:var(--surface);margin:0}
+.pulsar-banner{position:relative;aspect-ratio:16/6;background:linear-gradient(120deg,#141416,#0c0c0d);overflow:hidden}
+.pulsar-banner img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);opacity:.9}
+.pulsar-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(10,10,11,.85))}
+.pulsar-banner .bfb{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink-3);font-family:var(--font-mono);font-size:.75rem;letter-spacing:.2em;text-transform:uppercase}
+.pulsar-banner img.img-missing{display:none}
+.pulsar-meta{padding:0 24px 24px;margin-top:-40px;position:relative;display:flex;align-items:flex-end;gap:16px}
+.pulsar-meta .ava{width:88px;height:88px;border-radius:24px;border:2px solid var(--bg);box-shadow:0 10px 30px -12px rgba(0,0,0,.8)}
+.pulsar-meta .cname{font-family:var(--font-display);font-weight:700;font-size:1.5rem;letter-spacing:-0.02em;line-height:1.1}
+.pulsar-meta .crole{font-family:var(--font-mono);font-size:.74rem;color:var(--ink-3)}
+.pulsar-meta .cbot{margin-left:auto;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;background:#fff;color:#0a0a0b;border-radius:6px;padding:.2rem .45rem}
+.pulsar-bio{padding:0 24px 26px;color:var(--ink-2);font-size:.95rem}
+
+.feat{display:flex;flex-direction:column;gap:2px}
+.feat-item{display:grid;grid-template-columns:40px 1fr;gap:16px;padding:20px 4px;border-top:1px solid var(--line-2)}
+.feat-item:last-child{border-bottom:1px solid var(--line-2)}
+.feat-item .fi{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.feat-item .fi svg{width:19px;height:19px;color:var(--ink)}
+.feat-item .ft{font-family:var(--font-display);font-weight:600;letter-spacing:-0.01em;font-size:1.02rem}
+.feat-item .fd{color:var(--ink-2);font-size:.92rem;margin-top:4px}
+
+/* pulsar chat sample */
+.chat-sample{margin-top:34px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:16px}
+
+/* bot code box */
+.code-box{margin-top:16px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:20px}
+.code-box .cb-ttl{font-family:var(--font-display);font-weight:600;font-size:1.05rem;letter-spacing:-0.01em;margin-top:6px}
+.code-box .cb-txt{color:var(--ink-2);font-size:.9rem;margin-top:6px}
+.cb-row{margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cb-code{flex:1;min-width:0;display:block;padding:.78rem 1rem;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.28);
+  font-family:var(--font-mono);font-size:.84rem;color:var(--ink);overflow-x:auto;white-space:nowrap;user-select:all;cursor:text}
+
+/* ---------- minecraft ---------- */
+.mc-band{margin-top:52px;border:1px solid var(--line);border-radius:var(--r-xl);background:
+  radial-gradient(140% 120% at 12% 0%,rgba(255,255,255,.06),transparent 55%),var(--surface);
+  padding:clamp(28px,4vw,48px);display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+.mc-copy .h3{font-size:clamp(1.5rem,3vw,2.1rem);letter-spacing:-0.03em;margin-bottom:14px}
+.mc-copy p{color:var(--ink-2);max-width:46ch}
+.mc-list{display:flex;flex-direction:column;gap:12px}
+.mc-row{display:flex;align-items:center;gap:13px;padding:15px 17px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.16);font-size:.94rem;color:var(--ink-2)}
+.mc-row svg{width:19px;height:19px;flex:none;color:var(--ink)}
+.mc-row .st{margin-left:auto;font-family:var(--font-mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:6px;padding:.18rem .45rem}
+.mc-row .st.live{background:#fff;color:#0a0a0b;border-color:#fff}
+
+/* ---------- founder ---------- */
+.founder{margin-top:52px;border:1px solid var(--line);border-radius:var(--r-xl);background:var(--surface);
+  padding:clamp(28px,4vw,46px);display:grid;grid-template-columns:auto 1fr;gap:clamp(22px,3vw,40px);align-items:center}
+.founder .ava{width:clamp(96px,14vw,140px);height:clamp(96px,14vw,140px);border-radius:26px;border:1px solid var(--line);background:var(--surface-2);position:relative;overflow:hidden}
+.founder .ava img{width:100%;height:100%;object-fit:cover}
+.founder .ava img.img-missing{display:none}
+.founder .ava .mono-fb{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:2rem;color:var(--ink-3)}
+.founder .ava:has(img:not(.img-missing)) .mono-fb{display:none}
+.founder .fname{font-family:var(--font-display);font-weight:700;font-size:clamp(1.4rem,3vw,2rem);letter-spacing:-0.03em}
+.founder .frole{font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);margin-top:6px}
+.founder blockquote{margin:16px 0 0;color:var(--ink-2);font-size:clamp(.98rem,1.5vw,1.12rem);line-height:1.55;max-width:56ch}
+.founder blockquote::before{content:"“";color:var(--ink-3)}
+.founder blockquote::after{content:"”";color:var(--ink-3)}
+
+/* ---------- faq ---------- */
+.faq-grid{display:grid;grid-template-columns:.7fr 1.3fr;gap:48px;margin-top:52px;align-items:start}
+.faq-list{border-top:1px solid var(--line)}
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-q{width:100%;display:flex;align-items:center;gap:18px;padding:22px 4px;background:none;border:0;cursor:pointer;text-align:left;
+  font-family:var(--font-display);font-weight:500;font-size:clamp(1.02rem,1.7vw,1.24rem);letter-spacing:-0.02em;color:var(--ink);transition:color .25s}
+.faq-q:hover{color:#fff}
+.faq-q .chev{margin-left:auto;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;flex:none;transition:background .3s var(--ease),transform .4s var(--ease)}
+.faq-q .chev svg{width:16px;height:16px}
+.faq-item.open .faq-q .chev{background:#fff;color:#0a0a0b;transform:rotate(45deg)}
+.faq-a{overflow:hidden;max-height:0;transition:max-height .5s var(--ease)}
+.faq-a .inner{padding:0 4px 24px;color:var(--ink-2);max-width:66ch;font-size:.97rem}
+
+/* ---------- final cta ---------- */
+.final{margin-top:clamp(84px,11vw,140px);border-top:1px solid var(--line-2);padding:clamp(70px,9vw,120px) 0;text-align:center;position:relative;overflow:hidden}
+.final::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 320px at 50% 120%,rgba(255,255,255,.06),transparent 70%);pointer-events:none}
+.final .h2{position:relative}
+.final .lead{margin:22px auto 0;position:relative}
+.final .hero-cta{margin-top:32px}
+.invite-url{margin-top:20px;font-family:var(--font-mono);font-size:.82rem;color:var(--ink-3);position:relative;word-break:break-all}
+
+/* ---------- footer ---------- */
+.foot{border-top:1px solid var(--line-2);padding:64px 0 44px;position:relative;z-index:2}
+.foot-top{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:40px}
+.foot-brand .brand{margin-bottom:18px}
+.foot-brand p{color:var(--ink-3);font-size:.9rem;max-width:34ch}
+.ascii{margin-top:26px;font-family:var(--font-mono);font-size:clamp(.4rem,1.06vw,.72rem);line-height:1.15;color:rgba(255,255,255,.22);white-space:pre;letter-spacing:0}
+.foot-col .fl{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:16px}
+.foot-col a,.foot-col span{display:block;color:var(--ink-2);font-size:.92rem;padding:6px 0;transition:color .25s}
+.foot-col a:hover{color:#fff}
+.foot-bot{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-top:56px;padding-top:26px;border-top:1px solid var(--line-2);color:var(--ink-3);font-size:.82rem}
+.foot-bot .mono{font-size:.78rem}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,140%);z-index:150;
+  background:#fff;color:#0a0a0b;padding:12px 20px;border-radius:var(--r-full);font-weight:600;font-size:.9rem;
+  display:flex;align-items:center;gap:9px;box-shadow:0 20px 50px -18px rgba(0,0,0,.9);transition:transform .55s var(--ease)}
+.toast.show{transform:translate(-50%,0)}
+.toast svg{width:17px;height:17px}
+
+/* ---------- reveal (JS-only: content stays visible without JS) ---------- */
+.js .reveal{opacity:0;transform:translateY(26px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.js .reveal.in{opacity:1;transform:none}
+
+/* ---------- responsive ---------- */
+@media (max-width:1040px){
+  .win-body{grid-template-columns:190px 1fr}
+  .side--right{display:none}
+  .pulsar-grid{grid-template-columns:1fr}
+  .faq-grid{grid-template-columns:1fr;gap:32px}
+  .mc-band{grid-template-columns:1fr;gap:30px}
+}
+@media (max-width:900px){
+  .nav-links,.nav-cta{display:none}
+  .nav-toggle{display:flex}
+  .mobile-menu{display:block;position:fixed;inset:68px 0 auto 0;z-index:99;background:rgba(10,10,11,.96);
+    backdrop-filter:blur(18px);border-bottom:1px solid var(--line);transform:translateY(-130%);transition:transform .5s var(--ease);padding:14px 0 22px}
+  .mobile-menu.open{transform:none}
+  .mobile-menu a{display:block;padding:14px 24px;font-family:var(--font-display);font-size:1.15rem;font-weight:500;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
+  .mobile-menu .btn{margin:18px 24px 0;width:calc(100% - 48px);justify-content:center}
+  .bento{grid-template-columns:1fr}
+  .card--early,.card--pulsar,.card--mc,.card--lounge{grid-column:auto;grid-row:auto}
+  .foot-top{grid-template-columns:1fr 1fr}
+  .foot-brand{grid-column:1/-1}
+  .founder{grid-template-columns:1fr;justify-items:start}
+}
+@media (max-width:620px){
+  .wrap{padding:0 18px}
+  .hero{padding-top:120px}
+  .win-body{grid-template-columns:1fr;min-height:0}
+  .side{display:none}
+  .chat{padding:18px}
+  .mem-list{display:none}
+  .hero-cta .btn{width:100%;justify-content:center}
+  .cb-row .btn{width:100%;justify-content:center}
+  .foot-top{grid-template-columns:1fr}
+  .ascii{font-size:.34rem}
+  .count-chip{font-size:.76rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .hero .display .line > span{transform:none}
+  .hero-sub,.hero-cta,.hero-proof,.hero-visual{opacity:1}
+  .reveal{opacity:1;transform:none}
+  .marquee-track{animation:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- ============ CONFIG ============ -->
+<!-- Invite URL and Pulsar bot code are defined in JS below (INVITE, BOT_CODE). -->
+
+<header class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#top" aria-label="Hyperion home">
+      <span class="mark">
+        <img src="server-icon.png" alt="" onerror="this.classList.add('img-missing')">
+        <span class="mono-fb">H</span>
+      </span>
+      Hyperion
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#offers" data-spy="offers">What's inside</a>
+      <a href="pulsar/">Pulsar</a>
+      <a href="#minecraft" data-spy="minecraft">Minecraft</a>
+      <a href="#faq" data-spy="faq">FAQ</a>
+    </nav>
+    <a class="btn btn-primary btn-sm nav-cta" href="https://yapper.website/invite/hyperion" target="_blank" rel="noopener">
+      Join server
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</header>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#offers">What's inside</a>
+  <a href="pulsar/">Pulsar bot</a>
+  <a href="#minecraft">Minecraft</a>
+  <a href="#faq">FAQ</a>
+  <a class="btn btn-primary" href="https://yapper.website/invite/hyperion" target="_blank" rel="noopener">Join Hyperion</a>
+</div>
+
+<!-- ============ HERO ============ -->
+<main id="main">
+<section class="hero" id="top">
+  <div class="wrap">
+    <h1 class="display">
+      <span class="line"><span>Be here from the</span></span>
+      <span class="line"><span class="muted">very beginning.</span></span>
+    </h1>
+    <p class="lead hero-sub">Hyperion is a brand-new Yapper community. We're building an active, relaxed space from the ground up. And the earliest members get to shape what it turns into.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="https://yapper.website/invite/hyperion" target="_blank" rel="noopener">
+        Join Hyperion
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </a>
+      <button class="btn btn-ghost" id="copyInvite" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.4"/><path d="M5.5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v.5"/></svg>
+        Copy invite link
+      </button>
+    </div>
+    <div class="hero-proof">
+      <span class="count-chip">
+        <span class="pulse" aria-hidden="true"></span>
+        <b>Early Supporter</b>
+        <span class="cd" id="countdown" aria-live="polite">closes in —</span>
+      </span>
+      <span class="dot-sep" aria-hidden="true"></span>
+      <span>Free to join</span>
+      <span class="dot-sep" aria-hidden="true"></span>
+      <span>Custom bot</span>
+    </div>
+
+    <!-- live-looking server preview -->
+    <div class="hero-visual">
+      <div class="window" role="img" aria-label="Preview of the Hyperion server on Yapper: channels, a chat, and the member list.">
+        <div class="win-bar">
+          <span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="win-title">Hyperion | Yapper</span>
+          <span class="win-search">Search Hyperion</span>
+        </div>
+        <div class="win-body">
+          <aside class="side">
+            <div class="side-head">
+              <span class="mark"><img src="server-icon.png" alt="" onerror="this.classList.add('img-missing')"><span class="mono-fb">H</span></span>
+              <span><span class="nm">Hyperion</span><br><span class="sub">yapper.website</span></span>
+            </div>
+            <div class="ch-group">
+              <div class="gl">Information</div>
+              <div class="ch"><span class="hash">#</span> welcome</div>
+              <div class="ch"><span class="hash">#</span> rules</div>
+              <div class="ch"><span class="hash">#</span> announcements</div>
+            </div>
+            <div class="ch-group">
+              <div class="gl">General</div>
+              <div class="ch active"><span class="hash">#</span> general</div>
+              <div class="ch"><span class="hash">#</span> introductions</div>
+              <div class="ch"><span class="hash">#</span> roles</div>
+            </div>
+            <div class="ch-group">
+              <div class="gl">Gaming &amp; Dev</div>
+              <div class="ch"><span class="hash">#</span> gaming</div>
+              <div class="ch"><span class="hash">#</span> minecraft</div>
+              <div class="ch"><span class="hash">#</span> dev-talk</div>
+              <div class="ch"><span class="hash">#</span> projects</div>
+            </div>
+            <div class="ch-group">
+              <div class="gl">Lounge</div>
+              <div class="ch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v10M8 7l4-4 4 4"/><rect x="4" y="13" width="16" height="7" rx="2.5"/></svg> Lounge</div>
+            </div>
+          </aside>
+
+          <div class="chat">
+            <div class="chat-head">
+              <span class="cname"># general</span>
+              <span class="cdesc">Say hello and settle in.</span>
+              <span class="topic">day one</span>
+            </div>
+            <div class="msg">
+              <span class="ava"><img src="pulsar-avatar.png" alt="" onerror="this.classList.add('img-missing')"><span class="mono-fb">P</span></span>
+              <div class="mbody">
+                <div class="mhead"><span class="mname">Pulsar</span><span class="mtag bot">Bot</span><span class="mtime">today</span></div>
+                <div class="mtext">Welcome to <b style="color:var(--ink)">Hyperion</b>. Grab your roles in <span class="chan">#roles</span> — the Early Supporter role is open until October 20.</div>
+              </div>
+            </div>
+            <div class="msg">
+              <span class="ava"><img src="aragasu.png" alt="" onerror="this.classList.add('img-missing')"><span class="mono-fb">A</span></span>
+              <div class="mbody">
+                <div class="mhead"><span class="mname">aragasu</span><span class="mtag">Owner</span><span class="mtime">today</span></div>
+                <div class="mtext">Setting up the Minecraft server this week.</div>
+              </div>
+            </div>
+            <div class="msg">
+              <span class="ava"><span class="mono-fb">N</span></span>
+              <div class="mbody">
+                <div class="mhead"><span class="mname">newcomer</span><span class="mtime">just now</span></div>
+                <div class="mtext">glad I joined this early, this is going to be fun</div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="side side--right mem-list">
+            <div class="mem-group">
+              <div class="gl" style="margin-top:2px">Founder</div>
+              <div class="mem online"><span class="ava"><img src="aragasu.png" alt="" onerror="this.classList.add('img-missing')"><span class="mono-fb">A</span></span> aragasu <span class="mdot"></span></div>
+              <div class="mem online"><span class="ava"><img src="pulsar-avatar.png" alt="" onerror="this.classList.add('img-missing')"><span class="mono-fb">P</span></span> Pulsar <span class="pill">Bot</span></div>
+            </div>
+            <div class="mem-group">
+              <div class="gl">Early Supporter</div>
+              <div class="mem online"><span class="ava"><span class="mono-fb">M</span></span> mino <span class="mdot"></span></div>
+              <div class="mem online"><span class="ava"><span class="mono-fb">K</span></span> kaia <span class="mdot"></span></div>
+              <div class="mem off"><span class="ava"><span class="mono-fb">D</span></span> dev_null</div>
+              <div class="mem off"><span class="ava"><span class="mono-fb">S</span></span> sketch</div>
+            </div>
+            <div class="mem-group">
+              <div class="gl">Members</div>
+              <div class="mem off"><span class="ava"><span class="mono-fb">P</span></span> pixel</div>
+              <div class="mem off"><span class="ava"><span class="mono-fb">R</span></span> rain</div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" id="track">
+      <!-- duplicated in JS for a seamless loop -->
+      <span class="pill">Development</span><span class="pill">Gaming</span><span class="pill">Minecraft</span><span class="pill">Lounge</span><span class="pill">Custom bots</span><span class="pill">Moderation</span><span class="pill">Projects</span><span class="pill">Game nights</span><span class="pill">Tech talk</span><span class="pill">Early access</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OFFERS ============ -->
+<section class="sec" id="offers">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <h2 class="h2">Everything, <span class="muted">from day one.</span></h2>
+      <p class="lead">Four reasons to join Hyperion now instead of later. One of them only exists for the people who arrive early.</p>
+    </div>
+
+    <div class="bento">
+      <!-- Early supporter (wide) -->
+      <article class="card card--early reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l4 3 5-6 5 6 4-3-1.6 9.5a1 1 0 0 1-1 .9H5.6a1 1 0 0 1-1-.9L3 8z"/><path d="M5 20h14"/></svg></span>
+        <h3 class="card-ttl">Early Supporter role</h3>
+        <p class="card-txt">Join before October 20th and you automatically claim the exclusive Early Supporter role. A permanent marker that you were here before it was anything.</p>
+        <div class="cd-row" id="cdRow">
+          <div class="cd-box"><b data-cd="d">--</b><span>days</span></div>
+          <div class="cd-box"><b data-cd="h">--</b><span>hours</span></div>
+          <div class="cd-box"><b data-cd="m">--</b><span>minutes</span></div>
+          <div class="cd-box"><b data-cd="s">--</b><span>seconds</span></div>
+        </div>
+      </article>
+
+      <!-- Pulsar (tall) -->
+      <article class="card card--pulsar reveal">
+        <div class="pulsar-top">
+          <span class="ava"><img src="pulsar-avatar.png" alt="Pulsar bot" onerror="this.classList.add('img-missing')"><span class="mono-fb">P</span></span>
+          <span><span class="card-ttl" style="margin:0">A custom Yapper bot</span></span>
+        </div>
+        <p class="card-txt" style="margin-top:20px">Meet <b style="color:var(--ink)">@pulsar</b>, our own bot. Rebuilt for Yapper and rebranded, with moderation tools and utilities built in. And you can add it to your own server.</p>
+        <span class="badge-soft">Rebuilt · Rebranded</span>
+        <a class="card-link" href="pulsar/">Meet Pulsar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </a>
+      </article>
+
+      <!-- Minecraft -->
+      <article class="card card--mc reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.6l8 4.4v9L12 21.4 4 16V7l8-4.4z"/><path d="M4 7l8 4.6L20 7M12 11.6V21"/></svg></span>
+        <h3 class="card-ttl">Upcoming Minecraft server</h3>
+        <p class="card-txt">A dedicated server is in development. Join early to share suggestions and help shape the world.</p>
+      </article>
+
+      <!-- Lounge -->
+      <article class="card card--lounge reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4V5z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg></span>
+        <h3 class="card-ttl">Tech, gaming &amp; lounge</h3>
+        <p class="card-txt">Talk development, play games, or just hang out. A welcoming space with people to play with.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PULSAR ============ -->
+<section class="sec" id="pulsar">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <h2 class="h2">Meet Pulsar, <span class="muted">our own bot.</span></h2>
+      <p class="lead">Pulsar was rebuilt for Yapper's bot API, with a new name and a new codebase. Run it here in Hyperion, or add it to your own server.</p>
+    </div>
+
+    <div class="pulsar-grid">
+      <figure class="pulsar-card reveal">
+        <div class="pulsar-banner">
+          <img src="pulsar-banner.webp" alt="Pulsar banner" onerror="this.classList.add('img-missing')">
+          <span class="bfb">Pulsar</span>
+        </div>
+        <div class="pulsar-meta">
+          <span class="ava"><img src="pulsar-avatar.png" alt="Pulsar avatar" onerror="this.classList.add('img-missing')"><span class="mono-fb">P</span></span>
+          <div>
+            <div class="cname">Pulsar</div>
+            <div class="crole">@pulsar · Hyperion</div>
+          </div>
+          <span class="cbot">Bot</span>
+        </div>
+        <div class="pulsar-bio">The server's companion bot: moderation tools and everyday utilities, completely rewritten and rebranded for Yapper.</div>
+      </figure>
+
+      <div class="reveal">
+        <div class="feat">
+          <div class="feat-item">
+            <span class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3l8 4.2v5.3c0 4.6-3.3 7.6-8 9.5-4.7-1.9-8-4.9-8-9.5V7.2L13 3z"/><path d="M9 12l2.4 2.4L15 10.8"/></svg></span>
+            <div><div class="ft">Rebuilt for Yapper</div><div class="fd">A new codebase written for the platform's bot API, with a new name and identity. The ideas came from an older Discord bot; the code did not.</div></div>
+          </div>
+          <div class="feat-item">
+            <span class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.3-7 9-4-1.7-7-4.6-7-9V6l7-3z"/></svg></span>
+            <div><div class="ft">Moderation tools</div><div class="fd">Keeps the place calm and welcoming as the community grows.</div></div>
+          </div>
+          <div class="feat-item">
+            <span class="fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l3 3-8.5 8.5-3.6.6.6-3.6 8.5-8.5z"/><path d="M16 3.5L20.5 8"/><path d="M4 20h6"/></svg></span>
+            <div><div class="ft">Utilities</div><div class="fd">The small conveniences that make a server nicer to be in day to day.</div></div>
+          </div>
+        </div>
+
+        <div class="code-box">
+          <span class="tag">Add Pulsar to your server</span>
+          <div class="cb-ttl">Copy the bot code</div>
+          <p class="cb-txt">Copy the code below and use it to add Pulsar to your own server.</p>
+          <div class="cb-row">
+            <code class="cb-code" id="botCode" tabindex="0" aria-label="Pulsar bot code">—</code>
+            <button class="btn btn-primary btn-sm" id="copyBot" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.4"/><path d="M5.5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v.5"/></svg>
+              Copy bot code
+            </button>
+          </div>
+        </div>
+
+        <div class="chat-sample">
+          <div class="msg">
+            <span class="ava"><img src="pulsar-avatar.png" alt="" onerror="this.classList.add('img-missing')"><span class="mono-fb">P</span></span>
+            <div class="mbody">
+              <div class="mhead"><span class="mname">Pulsar</span><span class="mtag bot">Bot</span></div>
+              <div class="mtext">Welcome, <span class="mention">@newcomer</span></div>
+            </div>
+          </div>
+          <div class="msg">
+            <span class="ava"><span class="mono-fb">N</span></span>
+            <div class="mbody">
+              <div class="mhead"><span class="mname">newcomer</span></div>
+              <div class="mtext">it's nice to be early for once</div>
+            </div>
+          </div>
+        </div>
+
+        <a class="btn btn-ghost btn-sm" href="pulsar/" style="margin-top:14px;align-self:flex-start">
+          Pulsar's page &amp; all 159 commands
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MINECRAFT ============ -->
+<section class="sec" id="minecraft">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <h2 class="h2">A Minecraft server, <span class="muted">in the works.</span></h2>
+      <p class="lead">In development right now. Nothing is locked in yet, which is exactly why joining early matters.</p>
+    </div>
+
+    <div class="mc-band reveal">
+      <div class="mc-copy">
+        <h3 class="h3">Help build the world.</h3>
+        <p>We're putting together a dedicated server for the community. Arrive early, drop your suggestions, and the first version gets shaped around what members actually want to play.</p>
+      </div>
+      <div class="mc-list">
+        <div class="mc-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+          Shared survival world <span class="st live">Planned</span>
+        </div>
+        <div class="mc-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"/><path d="M4 10h16M9 6v12"/></svg>
+          Member suggestions first <span class="st live">Open now</span>
+        </div>
+        <div class="mc-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3.5 2"/></svg>
+          Beta launch <span class="st">Soon</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOUNDER ============ -->
+<section class="sec" id="founder">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <h2 class="h2">Who's building this.</h2>
+      <p class="lead">A new community is only as good as the person keeping it welcoming. That person is one, and they're reachable.</p>
+    </div>
+
+    <div class="founder reveal">
+      <span class="ava"><img src="aragasu.png" alt="aragasu" onerror="this.classList.add('img-missing')"><span class="mono-fb">A</span></span>
+      <div>
+        <div class="fname">aragasu</div>
+        <div class="frole">Founder &amp; server owner</div>
+        <blockquote>I'd rather build a small server with the right people than a big one with the wrong ones. Just kidding, I didn't say that. Who do you think I am? Shakespeare?</blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="sec" id="faq">
+  <div class="wrap">
+    <div class="faq-grid">
+      <div class="sec-head reveal" style="max-width:none">
+        <h2 class="h2">Questions? <span class="muted">Answers.</span></h2>
+        <p class="lead">The essentials, briefly. Anything else, just ask in the server.</p>
+      </div>
+
+      <div class="faq-list reveal" id="faqList">
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">What exactly is Hyperion?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">A brand-new community on Yapper. It's active, relaxed, and built from the ground up. Right now, with the people who join first.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">What is Yapper?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">A new chat platform, a Discord alternative. You join with a link, exactly like a Discord invite, right in your browser.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">How do I get the Early Supporter role?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">Join before October 20th. The role is applied automatically, so there's nothing to claim. You just have to be there in time.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">What can Pulsar actually do?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">Pulsar brings moderation tools and everyday utilities to Yapper — 159 commands in all. It was rebuilt for the platform's bot API rather than carried over from Discord. <a href="pulsar/" style="color:var(--ink);border-bottom:1px solid var(--line)">See the full command list</a>, or use the <a href="pulsar/custom-command-builder/" style="color:var(--ink);border-bottom:1px solid var(--line)">command builder</a> and the <a href="pulsar/embed-builder/" style="color:var(--ink);border-bottom:1px solid var(--line)">embed builder</a>.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Can I add Pulsar to my own server?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">Yes. Hit “Copy bot code” in the Pulsar section above, or visit <a href="pulsar/" style="color:var(--ink);border-bottom:1px solid var(--line)">Pulsar's page</a> for the code and the exact steps.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">When does the Minecraft server open?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">It's in development, with no fixed date yet. Members who join early get to suggest features and help decide what the first version looks like.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Is it free to join?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">Yes. Free to join, no strings, nothing to buy.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="final">
+  <div class="wrap">
+    <h2 class="h2 reveal">Come build it <span class="muted">with us.</span></h2>
+    <p class="lead reveal">Be here from the very beginning. Early Supporter closes October 20.</p>
+    <div class="hero-cta reveal">
+      <a class="btn btn-primary" href="https://yapper.website/invite/hyperion" target="_blank" rel="noopener">
+        Join Hyperion
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </a>
+      <button class="btn btn-ghost" id="copyInvite2" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.4"/><path d="M5.5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v.5"/></svg>
+        Copy invite link
+      </button>
+    </div>
+    <div class="invite-url">yapper.website/invite/hyperion</div>
+  </div>
+</section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a class="brand" href="#top">
+          <span class="mark"><img src="server-icon.png" alt="" onerror="this.classList.add('img-missing')"><span class="mono-fb">H</span></span>
+          Hyperion
+        </a>
+        <p>A brand-new Yapper community, built from the ground up. Free to join.</p>
+        <pre class="ascii" aria-hidden="true">█░█ █▄█ █▀█ █▀▀ █▀█ █ █▀█ █▄░█
+█▀█ ░█░ █▀▀ ██▄ █▀▄ █ █▄█ █░▀█</pre>
+      </div>
+      <div class="foot-col">
+        <div class="fl">Server</div>
+        <a href="#offers">What's inside</a>
+        <a href="pulsar/">Pulsar</a>
+        <a href="#minecraft">Minecraft</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="foot-col">
+        <div class="fl">Community</div>
+        <a href="https://yapper.website/invite/hyperion" target="_blank" rel="noopener">Join Hyperion</a>
+        <a href="#founder">Founder</a>
+        <span>#general</span>
+        <span>#minecraft</span>
+      </div>
+      <div class="foot-col">
+        <div class="fl">Invite</div>
+        <a href="https://yapper.website/invite/hyperion" target="_blank" rel="noopener">yapper.website/invite/hyperion</a>
+        <span>Early Supporter closes Oct 20</span>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span>© <span id="year">2026</span> Hyperion · Not affiliated with Yapper.</span>
+      <span class="mono">Built from day one.</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
+  <span id="toastMsg">Copied</span>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ CONFIG ============ */
+  var INVITE   = "https://yapper.website/invite/hyperion";
+  var BOT_CODE = "68229ea4-8772-44a2-bc0d-0ba7113935c2"; // Pulsar's bot code, as printed by p!invite
+
+  /* ---- nav + scrollspy ---- */
+  var nav = document.getElementById('nav');
+  function onScroll(){ nav.classList.toggle('scrolled', window.scrollY > 12); }
+  onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+
+  var spyLinks = [].slice.call(document.querySelectorAll('[data-spy]'));
+  var sections = spyLinks.map(function(l){ return document.getElementById(l.getAttribute('data-spy')); });
+  if('IntersectionObserver' in window){
+    var spy = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          spyLinks.forEach(function(l){ l.classList.toggle('active', l.getAttribute('data-spy') === e.target.id); });
+        }
+      });
+    }, {rootMargin:'-45% 0px -50% 0px', threshold:0});
+    sections.forEach(function(s){ if(s) spy.observe(s); });
+  }
+
+  /* ---- mobile menu ---- */
+  var toggle = document.getElementById('navToggle');
+  var menu = document.getElementById('mobileMenu');
+  toggle.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  menu.addEventListener('click', function(e){ if(e.target.tagName === 'A'){ menu.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); } });
+
+  /* ---- FAQ accordion ---- */
+  [].forEach.call(document.querySelectorAll('.faq-item'), function(item){
+    var btn = item.querySelector('.faq-q');
+    var panel = item.querySelector('.faq-a');
+    btn.addEventListener('click', function(){
+      var open = item.classList.contains('open');
+      // close others
+      [].forEach.call(document.querySelectorAll('.faq-item.open'), function(o){
+        if(o !== item){ o.classList.remove('open'); o.querySelector('.faq-q').setAttribute('aria-expanded','false'); o.querySelector('.faq-a').style.maxHeight = null; }
+      });
+      if(open){ item.classList.remove('open'); btn.setAttribute('aria-expanded','false'); panel.style.maxHeight = null; }
+      else { item.classList.add('open'); btn.setAttribute('aria-expanded','true'); panel.style.maxHeight = panel.scrollHeight + 'px'; }
+    });
+  });
+  window.addEventListener('resize', function(){
+    [].forEach.call(document.querySelectorAll('.faq-item.open .faq-a'), function(p){ p.style.maxHeight = p.scrollHeight + 'px'; });
+  });
+
+  /* ---- countdown to Oct 20 (end of Oct 19 local) ---- */
+  var target = new Date(2026, 9, 20, 0, 0, 0).getTime();
+  var cd = document.getElementById('countdown');
+  var boxes = document.querySelectorAll('[data-cd]');
+  var row = document.getElementById('cdRow');
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function tick(){
+    var diff = target - Date.now();
+    if(diff <= 0){
+      if(cd) cd.textContent = 'the window has closed';
+      if(row){ row.outerHTML = '<p class="kicker-stat" style="margin-top:24px">The Early Supporter window has closed — but you can still join Hyperion any time.</p>'; }
+      boxes = [];
+      clearInterval(timer);
+      return;
+    }
+    var d = Math.floor(diff/86400000), h = Math.floor(diff%86400000/3600000), m = Math.floor(diff%3600000/60000), s = Math.floor(diff%60000/1000);
+    if(cd) cd.textContent = 'closes in ' + d + 'd ' + pad(h) + 'h ' + pad(m) + 'm ' + pad(s) + 's';
+    [].forEach.call(boxes, function(b){
+      var k = b.getAttribute('data-cd'), v = k==='d'?d:k==='h'?h:k==='m'?m:s;
+      b.textContent = k==='d' ? v : pad(v);
+    });
+  }
+  var timer = setInterval(tick, 1000); tick();
+
+  /* ---- toast + generic copy helper ---- */
+  var toast = document.getElementById('toast');
+  var toastMsg = document.getElementById('toastMsg');
+  var toastTimer;
+  function showToast(msg){
+    toastMsg.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 2200);
+  }
+  function copyText(text, okMsg){
+    if(!text){ showToast('Nothing to copy'); return; }
+    var done = function(){ showToast(okMsg); };
+    var fallback = function(){
+      var t = document.createElement('textarea');
+      t.value = text; t.setAttribute('readonly','');
+      t.style.position = 'absolute'; t.style.left = '-9999px';
+      document.body.appendChild(t); t.select();
+      try{ if(document.execCommand('copy')){ done(); } else { showToast('Copy failed'); } }
+      catch(e){ showToast('Copy failed'); }
+      document.body.removeChild(t);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  }
+
+  /* ---- copy invite ---- */
+  ['copyInvite','copyInvite2'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.addEventListener('click', function(){ copyText(INVITE, 'Invite link copied'); });
+  });
+
+  /* ---- copy Pulsar bot code ---- */
+  var botEl = document.getElementById('botCode');
+  var botBtn = document.getElementById('copyBot');
+  if(botEl) botEl.textContent = BOT_CODE;
+  if(botBtn) botBtn.addEventListener('click', function(){ copyText(BOT_CODE, 'Bot code copied'); });
+
+  /* ---- reveal on scroll ---- */
+  var reveals = [].slice.call(document.querySelectorAll('.reveal'));
+  if('IntersectionObserver' in window){
+    var ro = new IntersectionObserver(function(entries){
+      entries.forEach(function(e, i){
+        if(e.isIntersecting){
+          var el = e.target;
+          el.style.transitionDelay = Math.min(i * 70, 210) + 'ms';
+          el.classList.add('in');
+          ro.unobserve(el);
+        }
+      });
+    }, {rootMargin:'0px 0px -8% 0px', threshold:.08});
+    reveals.forEach(function(el){ ro.observe(el); });
+  } else { reveals.forEach(function(el){ el.classList.add('in'); }); }
+
+  /* ---- duplicate marquee for seamless loop ---- */
+  var track = document.getElementById('track');
+  if(track){ track.innerHTML += track.innerHTML; }
+
+  /* ---- year ---- */
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
