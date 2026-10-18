@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pulsar | Hyperion's bot on Yapper</title>
+<meta name="description" content="Pulsar is Hyperion's own Yapper bot: 159 commands for moderation, tickets, giveaways, games, coins and levels, rebuilt on Yapper's official bot API.">
+<link rel="icon" href="../pulsar-avatar.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Pulsar | Hyperion's bot on Yapper">
+<meta property="og:description" content="159 commands. Moderation, tickets, giveaways, games and coins. Add Pulsar to your own server.">
+<meta property="og:image" content="../pulsar-banner.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+/* ============================================================
+   Pulsar — same monochrome system as Hyperion, with a signal.
+   Near-black ground, white ink, hairline chrome, one rotating beam.
+   ============================================================ */
+
+:root{
+  --bg:#0a0a0b;
+  --bg-elev:#0f0f11;
+  --ink:#f5f5f6;
+  --ink-2:#a6a6ad;
+  --ink-3:#8b8b92;
+  --line:rgba(255,255,255,.10);
+  --line-2:rgba(255,255,255,.055);
+  --surface:rgba(255,255,255,.028);
+  --surface-2:rgba(255,255,255,.055);
+  --white:#ffffff;
+  --r-sm:10px; --r-md:16px; --r-lg:22px; --r-xl:30px; --r-full:999px;
+  --maxw:1160px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --font-display:"Outfit","Inter",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.6;
+  letter-spacing:-0.005em;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(900px 560px at 50% -180px, rgba(255,255,255,.06), transparent 70%),
+    radial-gradient(620px 460px at 92% 14%, rgba(255,255,255,.022), transparent 62%);
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;
+}
+
+::selection{background:#fff;color:#0a0a0b}
+:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:6px}
+
+*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border:3px solid var(--bg);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3)}
+
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit}
+
+.wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+.skip{position:fixed;top:12px;left:12px;z-index:200;transform:translateY(-200%);
+  background:#fff;color:#0a0a0b;padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px}
+.skip:focus{transform:none}
+
+/* ---------- typography ---------- */
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;letter-spacing:-0.03em;line-height:1.02;margin:0}
+.display{font-size:clamp(2.8rem,6.6vw,5.1rem);font-weight:700;line-height:.98;letter-spacing:-0.04em}
+.h2{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.03}
+.h3{font-size:clamp(1.25rem,2.2vw,1.6rem);letter-spacing:-0.02em}
+.muted{color:var(--ink-3)}
+.lead{font-size:clamp(1.02rem,1.5vw,1.18rem);color:var(--ink-2);max-width:66ch}
+p{margin:0}
+
+.mono{font-family:var(--font-mono);font-weight:500;letter-spacing:.02em}
+.tag{
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3)
+}
+.eyebrow{display:inline-flex;align-items:center;gap:.55rem;font-family:var(--font-mono);font-size:.72rem;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.eyebrow .sig{width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 0 0 rgba(255,255,255,.55);animation:pulse 2.4s infinite}
+
+/* ---------- buttons ---------- */
+.btn{
+  --pad:.82rem 1.35rem;
+  display:inline-flex;align-items:center;gap:.6rem;
+  padding:var(--pad);border-radius:var(--r-full);
+  font-weight:600;font-size:.95rem;letter-spacing:-0.01em;
+  border:1px solid transparent;cursor:pointer;
+  transition:transform .35s var(--ease),background .3s var(--ease),border-color .3s var(--ease),color .3s var(--ease),box-shadow .35s var(--ease);
+  white-space:nowrap;
+}
+.btn svg{width:18px;height:18px;flex:none;transition:transform .35s var(--ease)}
+.btn-primary{background:#fff;color:#0a0a0b}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 30px -12px rgba(255,255,255,.55)}
+.btn-primary:hover svg{transform:translateX(3px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-ghost{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.btn-ghost:hover{background:var(--surface-2);border-color:rgba(255,255,255,.24);transform:translateY(-2px)}
+.btn-sm{--pad:.6rem 1.05rem;font-size:.9rem}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ---------- nav ---------- */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;transition:background .4s var(--ease),border-color .4s var(--ease),backdrop-filter .4s}
+.nav::after{content:"";position:absolute;inset:0;border-bottom:1px solid transparent;transition:border-color .4s var(--ease);pointer-events:none}
+.nav.scrolled{background:rgba(10,10,11,.72);backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px)}
+.nav.scrolled::after{border-color:var(--line-2)}
+.nav-in{display:flex;align-items:center;gap:14px;height:68px}
+.brand{display:flex;align-items:center;gap:11px;font-family:var(--font-display);font-weight:700;font-size:1.06rem;letter-spacing:-0.02em;position:relative;z-index:2}
+.brand .mark{width:34px;height:34px;border-radius:10px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line);position:relative;flex:none}
+.brand .mark img{width:100%;height:100%;object-fit:cover}
+.brand .bot-pill{font-family:var(--font-mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;background:#fff;color:#0a0a0b;border-radius:4px;padding:.12rem .3rem}
+.nav-links{display:flex;align-items:center;gap:2px;margin-left:auto}
+.nav-links a{position:relative;padding:.5rem .8rem;border-radius:var(--r-full);font-size:.9rem;color:var(--ink-2);transition:color .25s,background .25s}
+.nav-links a:hover{color:var(--ink);background:var(--surface)}
+.nav-links a.active{color:var(--ink)}
+.nav-links a.active::after{content:"";position:absolute;left:50%;bottom:2px;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#fff}
+.nav-links .back{color:var(--ink-3)}
+.nav-cta{margin-left:10px;position:relative;z-index:2}
+.nav-toggle{display:none;margin-left:auto;width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);align-items:center;justify-content:center}
+.nav-toggle svg{width:20px;height:20px}
+.mobile-menu{display:none}
+
+/* ---------- hero ---------- */
+.hero{position:relative;z-index:2;padding-top:148px;padding-bottom:10px}
+.hero-grid{display:grid;grid-template-columns:1.04fr .96fr;gap:clamp(30px,5vw,64px);align-items:center}
+.hero-copy{max-width:620px}
+.hero .display{margin-top:22px}
+.hero .display .line{display:block;overflow:hidden}
+.hero .display .line > span{display:block;transform:translateY(105%);animation:rise 1.05s var(--ease) forwards}
+.hero .display .line:nth-child(2) > span{animation-delay:.08s}
+@keyframes rise{to{transform:translateY(0)}}
+.hero-sub{margin-top:24px;opacity:0;animation:fade .9s var(--ease) .4s forwards}
+.hero-cta{margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;opacity:0;animation:fade .9s var(--ease) .55s forwards}
+.hero-facts{margin-top:22px;display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;color:var(--ink-3);font-size:.84rem;opacity:0;animation:fade .9s var(--ease) .7s forwards}
+.hero-facts .dot{width:4px;height:4px;border-radius:50%;background:var(--line)}
+.hero-facts code{font-family:var(--font-mono);font-size:.8rem;color:var(--ink-2);background:var(--surface);border:1px solid var(--line-2);border-radius:6px;padding:.1rem .38rem}
+.hero-visual{opacity:0;animation:rise-slow 1.2s var(--ease) .5s forwards}
+@keyframes fade{to{opacity:1}}
+@keyframes rise-slow{from{opacity:0;transform:translateY(36px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}70%{box-shadow:0 0 0 9px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+
+/* signal visual */
+.signal{position:relative;width:100%;max-width:470px;aspect-ratio:1/1;margin:0 auto;display:grid;place-items:center}
+.signal .ring{position:absolute;border:1px solid var(--line);border-radius:50%}
+.signal .r1{inset:2%}
+.signal .r2{inset:16%;border-color:var(--line-2)}
+.signal .r3{inset:31%;border-color:var(--line-2)}
+.signal .ticks{position:absolute;inset:2%;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.26) 0deg .5deg,transparent .5deg 7.5deg);
+  -webkit-mask-image:radial-gradient(circle,transparent 71%,#000 71.5%,#000 72.6%,transparent 73.2%);
+  mask-image:radial-gradient(circle,transparent 71%,#000 71.5%,#000 72.6%,transparent 73.2%);
+  opacity:.55}
+.signal .beam{position:absolute;inset:2%;border-radius:50%;animation:spin 16s linear infinite;
+  background:conic-gradient(from 0deg,transparent 0deg 296deg,rgba(255,255,255,.05) 322deg,rgba(255,255,255,.17) 348deg,rgba(255,255,255,.55) 359.4deg,transparent 360deg);
+  -webkit-mask-image:radial-gradient(circle,transparent 30%,#000 31% 50%,transparent 72%);
+  mask-image:radial-gradient(circle,transparent 30%,#000 31% 50%,transparent 72%)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.signal .glow{position:absolute;inset:14%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.105),transparent 64%)}
+.signal .core{position:relative;z-index:2;width:31%;aspect-ratio:1/1;border-radius:29%;overflow:hidden;
+  border:1px solid rgba(255,255,255,.2);background:#111;
+  box-shadow:0 0 0 9px rgba(10,10,11,.68),0 26px 70px -22px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.1)}
+.signal .core img{width:100%;height:100%;object-fit:cover}
+.orbit{position:absolute;z-index:3;display:inline-flex;align-items:center;gap:.5rem;
+  padding:.42rem .72rem;border-radius:var(--r-full);border:1px solid var(--line);
+  background:rgba(10,10,11,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  font-family:var(--font-mono);font-size:.74rem;color:var(--ink-2);white-space:nowrap;
+  box-shadow:0 12px 30px -18px rgba(0,0,0,.9)}
+.orbit b{font-weight:500;color:var(--ink)}
+.orbit .p{color:var(--ink-3)}
+.orbit.top{top:1%;left:50%;transform:translateX(-50%)}
+.orbit.right{right:-1%;top:50%;transform:translateY(-50%)}
+.orbit.bottom{bottom:1%;left:50%;transform:translateX(-50%)}
+.orbit.left{left:-1%;top:50%;transform:translateY(-50%)}
+@media (prefers-reduced-motion:reduce){.signal .beam{animation:none}}
+
+/* ---------- profile band ---------- */
+.profile-band{margin-top:clamp(54px,7vw,84px);border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));position:relative;
+  box-shadow:0 40px 120px -60px rgba(0,0,0,.9)}
+.pb-banner{position:relative;height:clamp(118px,15vw,182px);overflow:hidden;background:#0d0d0f}
+.pb-banner img{width:100%;height:100%;object-fit:cover;object-position:center 44%;filter:grayscale(1) contrast(1.02);opacity:.34}
+.pb-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,11,.42) 0%,rgba(10,10,11,.74) 58%,var(--bg) 100%)}
+.pb-in{padding:0 clamp(20px,3.4vw,38px) 28px;margin-top:clamp(-70px,-9vw,-54px);position:relative;display:flex;gap:22px;align-items:flex-end;flex-wrap:wrap}
+.pb-ava{width:clamp(84px,11vw,112px);height:clamp(84px,11vw,112px);border-radius:27px;overflow:hidden;flex:none;
+  border:2px solid var(--bg);background:#111;box-shadow:0 18px 44px -18px rgba(0,0,0,.9)}
+.pb-ava img{width:100%;height:100%;object-fit:cover}
+.pb-id{min-width:0;padding-bottom:6px}
+.pb-name{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:clamp(1.5rem,2.6vw,2rem);letter-spacing:-0.03em;line-height:1.05}
+.pb-bot{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;background:#fff;color:#0a0a0b;border-radius:5px;padding:.18rem .4rem}
+.pb-handle{margin-top:6px;font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3)}
+.pb-stats{margin-left:auto;display:flex;gap:clamp(18px,3vw,40px);flex-wrap:wrap;padding-bottom:8px}
+.pb-stat b{display:block;font-family:var(--font-display);font-weight:700;font-size:clamp(1.35rem,2.4vw,1.9rem);letter-spacing:-0.02em;line-height:1;font-variant-numeric:tabular-nums}
+.pb-stat span{display:block;margin-top:7px;font-family:var(--font-mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.pb-bio{margin-top:22px;padding-top:20px;border-top:1px solid var(--line-2);display:flex;gap:24px;align-items:center;flex-wrap:wrap;color:var(--ink-2);font-size:.95rem;max-width:none}
+.pb-bio p{max-width:62ch}
+.pb-bio .btn{margin-left:auto}
+
+/* ---------- marquee ---------- */
+.marquee{position:relative;z-index:2;margin-top:clamp(46px,6vw,68px);padding:20px 0;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);
+  mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);overflow:hidden}
+.marquee-track{display:flex;gap:12px;width:max-content;animation:slide 42s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+@keyframes slide{to{transform:translateX(-50%)}}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:.46rem .95rem;border-radius:var(--r-full);border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-size:.84rem;white-space:nowrap}
+.pill .dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.35)}
+
+/* ---------- sections ---------- */
+section{position:relative;z-index:2}
+.sec{padding:clamp(82px,10vw,138px) 0 0}
+.sec-head{max-width:760px}
+.sec-head .h2{margin-bottom:18px}
+.sec-head .lead{color:var(--ink-2)}
+.sec-head .eyebrow{margin-bottom:16px}
+
+/* ---------- bento ---------- */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:48px}
+.card{
+  position:relative;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);
+  padding:25px;overflow:hidden;display:flex;flex-direction:column;
+  transition:border-color .45s var(--ease),background .45s var(--ease),transform .45s var(--ease);
+}
+.card:hover{border-color:rgba(255,255,255,.22);background:var(--surface-2);transform:translateY(-3px)}
+.card .ico{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.03);display:grid;place-items:center;margin-bottom:22px}
+.card .ico svg{width:21px;height:21px;color:var(--ink)}
+.card .card-ttl{font-family:var(--font-display);font-weight:600;font-size:1.16rem;letter-spacing:-0.02em}
+.card .card-txt{margin-top:9px;color:var(--ink-2);font-size:.91rem;line-height:1.58}
+.card .card-txt code,.card .card-list code{font-family:var(--font-mono);font-size:.82em;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line-2);border-radius:5px;padding:.05rem .3rem;white-space:nowrap}
+.card .card-list{margin:14px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;color:var(--ink-3);font-family:var(--font-mono);font-size:.74rem}
+.card .card-list li{display:flex;gap:8px;align-items:baseline}
+.card .card-list li::before{content:"";width:5px;height:1px;background:rgba(255,255,255,.4);flex:none;transform:translateY(-3px)}
+.card--w3{grid-column:span 3}
+.card--w2{grid-column:span 2}
+.card .card-note{margin-top:auto;padding-top:16px;font-family:var(--font-mono);font-size:.68rem;color:var(--ink-3)}
+
+/* ---------- essentials ---------- */
+.essentials{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:48px}
+.essentials .card{padding:clamp(22px,3vw,28px)}
+.ess-hero{grid-column:1/-1;display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(24px,4vw,54px);align-items:start;
+  border-color:rgba(255,255,255,.2);
+  background:radial-gradient(130% 150% at 0% 0%,rgba(255,255,255,.075),transparent 56%),var(--surface)}
+.ess-hero::after{content:"";position:absolute;right:-70px;top:-70px;width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.05),transparent 66%);pointer-events:none}
+.ess-flag{position:relative;display:inline-flex;align-items:center;gap:.45rem;font-family:var(--font-mono);font-size:.64rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);border:1px solid var(--line);
+  border-radius:var(--r-full);padding:.3rem .62rem;background:rgba(255,255,255,.05);margin-bottom:18px}
+.ess-flag .dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:pulse 2.4s infinite}
+.ess-hero .card-ttl{position:relative;font-size:clamp(1.5rem,3vw,2rem)}
+.ess-hero .card-txt{position:relative;margin-top:12px;max-width:52ch}
+.ess-hero .card-list{position:relative;margin-top:18px;font-family:var(--font-body);font-size:.83rem;color:var(--ink-2);gap:9px}
+.ess-cmds{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ess-lbl{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:3px}
+.ess-cmd{display:block;padding:10px 12px;border:1px solid var(--line-2);border-radius:10px;background:rgba(0,0,0,.26)}
+.ess-cmd code{display:block;font-family:var(--font-mono);font-size:.78rem;color:var(--ink);white-space:nowrap;overflow-x:auto;scrollbar-width:none}
+.ess-cmd code::-webkit-scrollbar{display:none}
+.ess-cmd span{display:block;margin-top:3px;font-size:.73rem;color:var(--ink-3);line-height:1.4}
+.ess-note{margin-top:6px;font-size:.76rem;color:var(--ink-3);line-height:1.5}
+.ess-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.ess-top .ico{margin-bottom:0}
+.ess-fig{flex:none;text-align:right}
+.ess-fig b{display:block;font-family:var(--font-display);font-weight:600;font-size:1.7rem;line-height:1;letter-spacing:-0.03em}
+.ess-fig span{display:block;margin-top:4px;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.ess-top + .card-ttl{margin-top:20px}
+.ess-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.ess-tags code{font-family:var(--font-mono);font-size:.7rem;color:var(--ink-2);background:rgba(0,0,0,.24);
+  border:1px solid var(--line-2);border-radius:6px;padding:.2rem .46rem;white-space:nowrap}
+.ess-tags code.more{color:var(--ink-3);background:transparent}
+.ess-more{position:relative;display:inline-flex;align-items:center;gap:.45rem;margin-top:22px;font-size:.85rem;font-weight:500;
+  color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:2px;transition:border-color .3s var(--ease)}
+.ess-more:hover{border-color:#fff}
+.ess-more svg{width:15px;height:15px}
+
+/* ---------- the trap, step by step ---------- */
+.trap{display:grid;grid-template-columns:.92fr 1.08fr;gap:clamp(26px,4vw,58px);margin-top:48px;align-items:start}
+.trap-steps{list-style:none;margin:0;padding:0}
+.trap-step{position:relative;display:grid;grid-template-columns:50px 1fr;gap:20px;padding-bottom:34px}
+.trap-step:last-child{padding-bottom:0}
+.trap-step::before{content:"";position:absolute;left:24px;top:52px;bottom:8px;width:1px;background:var(--line)}
+.trap-step:last-child::before{display:none}
+.trap-n{width:50px;height:50px;border-radius:50%;border:1px solid var(--line);background:rgba(0,0,0,.3);
+  display:grid;place-items:center;font-family:var(--font-mono);font-size:.76rem;color:var(--ink-2)}
+.trap-step.key .trap-n{background:#fff;color:#0a0a0b;border-color:#fff}
+.trap-t{font-family:var(--font-display);font-weight:600;font-size:1.05rem;letter-spacing:-0.02em;padding-top:11px}
+.trap-d{margin-top:8px;color:var(--ink-2);font-size:.91rem;max-width:56ch}
+.trap-d + .trap-d{margin-top:9px}
+.trap-d code{font-family:var(--font-mono);font-size:.84em;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line-2);border-radius:5px;padding:.05rem .3rem;white-space:nowrap}
+.trap-d b{color:var(--ink);font-weight:500}
+.trap-tag{display:inline-block;margin-top:12px;font-family:var(--font-mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);border:1px solid var(--line-2);border-radius:var(--r-full);padding:.24rem .56rem}
+.trap-side{display:flex;flex-direction:column;gap:16px}
+.trap-card{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:clamp(20px,2.6vw,26px)}
+.trap-card.alert{background:radial-gradient(120% 130% at 100% 0%,rgba(255,255,255,.07),transparent 58%),var(--surface)}
+.trap-lbl{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.trap-head{display:flex;gap:12px;align-items:flex-start;margin-top:16px}
+.trap-bar{width:3px;align-self:stretch;min-height:34px;border-radius:3px;background:#fff;opacity:.8;flex:none}
+.trap-alert-ttl{font-family:var(--font-display);font-weight:600;font-size:1.02rem;letter-spacing:-0.015em}
+.trap-alert-sub{margin-top:5px;font-size:.85rem;color:var(--ink-2)}
+.trap-rows{margin:18px 0 0;display:flex;flex-direction:column;gap:11px}
+.trap-row{display:grid;grid-template-columns:86px 1fr;gap:12px;font-size:.83rem}
+.trap-row dt{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding-top:3px}
+.trap-row dd{margin:0;color:var(--ink-2);line-height:1.5;word-break:break-word}
+.trap-row dd .ok{color:var(--ink)}
+.trap-alert-foot{margin-top:18px;padding-top:14px;border-top:1px solid var(--line-2);font-size:.77rem;color:var(--ink-3);line-height:1.5}
+.trap-log{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+.trap-log-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:11px 13px;border:1px solid var(--line-2);
+  border-radius:10px;background:rgba(0,0,0,.24);font-size:.79rem;color:var(--ink-2)}
+.trap-log-row > span{min-width:0;overflow-wrap:anywhere}
+.trap-log-row b{color:var(--ink);font-weight:500}
+.trap-log-row .st{font-family:var(--font-mono);font-size:.68rem;color:var(--ink-3);white-space:nowrap}
+.trap-guards{margin:16px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;color:var(--ink-2);font-size:.85rem}
+.trap-guards li{display:flex;gap:10px;align-items:baseline}
+.trap-guards li::before{content:"";width:6px;height:1px;background:rgba(255,255,255,.42);flex:none;transform:translateY(-3px)}
+.trap-guards b{color:var(--ink);font-weight:500}
+
+/* ---------- command explorer ---------- */
+.cmd-box{margin-top:38px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);overflow:hidden}
+.cmd-toolbar{padding:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line-2)}
+.cmd-search{position:relative;flex:1;min-width:230px}
+.cmd-search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-3);pointer-events:none}
+.cmd-search input{width:100%;height:44px;padding:0 14px 0 41px;border-radius:12px;border:1px solid var(--line);
+  background:rgba(0,0,0,.26);color:var(--ink);font:inherit;font-size:.92rem;transition:border-color .25s,background .25s}
+.cmd-search input::placeholder{color:var(--ink-3)}
+.cmd-search input:focus{outline:none;border-color:rgba(255,255,255,.32);background:rgba(0,0,0,.38)}
+.cmd-search input:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.cmd-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:.42rem .78rem;border-radius:var(--r-full);border:1px solid var(--line);background:transparent;
+  color:var(--ink-2);font-size:.8rem;cursor:pointer;transition:background .25s,color .25s,border-color .25s;white-space:nowrap}
+.chip:hover{background:var(--surface-2);color:var(--ink)}
+.chip.on{background:#fff;color:#0a0a0b;border-color:#fff}
+.chip .n{font-family:var(--font-mono);font-size:.68rem;opacity:.6;margin-left:.28rem}
+.cmd-list{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-2);max-height:540px;overflow-y:auto;overscroll-behavior:contain}
+.cmd{display:grid;grid-template-columns:minmax(92px,auto) 1fr;gap:14px;align-items:baseline;
+  padding:12px 16px;background:var(--bg);border:0;text-align:left;cursor:pointer;width:100%;
+  transition:background .2s}
+.cmd:hover{background:rgba(255,255,255,.038)}
+.cmd:focus-visible{outline:2px solid #fff;outline-offset:-2px;border-radius:0}
+.cmd .cname{font-family:var(--font-mono);font-size:.82rem;color:var(--ink);white-space:nowrap}
+.cmd .cname .p{color:var(--ink-3)}
+.cmd .cdesc{font-size:.79rem;color:var(--ink-3);line-height:1.45}
+.cmd[hidden]{display:none}
+.cmd-empty{padding:46px 20px;text-align:center;color:var(--ink-3);font-size:.92rem;grid-column:1/-1;background:var(--bg)}
+.cmd-foot{padding:13px 17px;border-top:1px solid var(--line-2);display:flex;justify-content:space-between;gap:12px;align-items:center;
+  font-size:.76rem;color:var(--ink-3);flex-wrap:wrap}
+.cmd-foot .mono{font-size:.72rem}
+.cmd-foot b{color:var(--ink-2);font-weight:500}
+
+/* ---------- facts / under the hood ---------- */
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px}
+.fact{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:26px}
+.fact .n{font-family:var(--font-mono);font-size:.7rem;color:var(--ink-3);letter-spacing:.14em}
+.fact .ft{margin-top:18px;font-family:var(--font-display);font-weight:600;font-size:1.14rem;letter-spacing:-0.02em}
+.fact .fd{margin-top:8px;color:var(--ink-2);font-size:.9rem}
+
+/* ---------- spotlight rows ---------- */
+.spots{display:flex;flex-direction:column;gap:0;margin-top:44px;border-top:1px solid var(--line)}
+.spot{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(26px,4vw,56px);padding:clamp(28px,4vw,42px) 0;border-bottom:1px solid var(--line);align-items:start}
+.spot .s-k{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.spot .s-t{font-family:var(--font-display);font-weight:600;font-size:clamp(1.25rem,2.4vw,1.65rem);letter-spacing:-0.025em;margin-top:10px;max-width:20ch}
+.spot .s-d{color:var(--ink-2);font-size:.96rem;max-width:62ch}
+.spot .s-d + .s-d{margin-top:12px}
+.spot code{font-family:var(--font-mono);font-size:.84em;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line-2);border-radius:5px;padding:.05rem .32rem;white-space:nowrap}
+.spot .s-quote{margin-top:18px;padding-left:15px;border-left:2px solid rgba(255,255,255,.2);color:var(--ink-3);font-size:.88rem}
+
+/* ---------- add ---------- */
+.add-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(26px,4vw,54px);margin-top:48px;align-items:start}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.step{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--line-2)}
+.step:last-child{border-bottom:1px solid var(--line-2)}
+.step .sn{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;
+  font-family:var(--font-mono);font-size:.72rem;color:var(--ink-2);margin-top:2px}
+.step .st{font-family:var(--font-display);font-weight:600;letter-spacing:-0.01em;font-size:1.02rem}
+.step .sd{color:var(--ink-2);font-size:.9rem;margin-top:5px}
+.step .sd code{font-family:var(--font-mono);font-size:.82em;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line-2);border-radius:5px;padding:.05rem .3rem}
+.add-card{border:1px solid var(--line);border-radius:var(--r-lg);background:
+  radial-gradient(120% 130% at 100% 0%,rgba(255,255,255,.06),transparent 58%),var(--surface);padding:clamp(22px,3vw,30px)}
+.add-card .ac-top{display:flex;align-items:center;gap:12px}
+.add-card .ac-top .ava{width:46px;height:46px;border-radius:13px;overflow:hidden;border:1px solid var(--line);background:#111;flex:none}
+.add-card .ac-top .ava img{width:100%;height:100%;object-fit:cover}
+.add-card .ac-name{font-family:var(--font-display);font-weight:600;font-size:1.05rem;letter-spacing:-0.01em;display:flex;align-items:center;gap:8px}
+.add-card .ac-sub{font-family:var(--font-mono);font-size:.68rem;color:var(--ink-3);margin-top:2px}
+.add-card .ac-bot{font-family:var(--font-mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;background:#fff;color:#0a0a0b;border-radius:4px;padding:.12rem .32rem}
+.add-card .ac-lbl{margin-top:26px;font-family:var(--font-mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.bot-code{display:block;width:100%;margin-top:9px;padding:.85rem 1rem;border:1px solid var(--line);border-radius:12px;
+  background:rgba(0,0,0,.32);font-family:var(--font-mono);font-size:.8rem;color:var(--ink);
+  overflow-x:auto;white-space:nowrap;user-select:all;cursor:text}
+.add-card .btn{width:100%;justify-content:center;margin-top:12px}
+.add-card .ac-note{margin-top:16px;font-size:.82rem;color:var(--ink-3);line-height:1.5}
+.add-card .ac-note b{color:var(--ink-2);font-weight:500}
+
+/* ---------- prefix strip ---------- */
+.prefix-strip{margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.prefix{border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.18);padding:14px 16px}
+.prefix .pc{font-family:var(--font-mono);font-size:.92rem;color:var(--ink)}
+.prefix .pl{font-size:.76rem;color:var(--ink-3);margin-top:5px}
+
+/* ---------- faq ---------- */
+.faq-grid{display:grid;grid-template-columns:.7fr 1.3fr;gap:48px;margin-top:48px;align-items:start}
+.faq-list{border-top:1px solid var(--line)}
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-q{width:100%;display:flex;align-items:center;gap:18px;padding:21px 4px;background:none;border:0;cursor:pointer;text-align:left;
+  font-family:var(--font-display);font-weight:500;font-size:clamp(1.02rem,1.7vw,1.2rem);letter-spacing:-0.02em;color:var(--ink);transition:color .25s}
+.faq-q:hover{color:#fff}
+.faq-q .chev{margin-left:auto;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;flex:none;transition:background .3s var(--ease),transform .4s var(--ease)}
+.faq-q .chev svg{width:16px;height:16px}
+.faq-item.open .faq-q .chev{background:#fff;color:#0a0a0b;transform:rotate(45deg)}
+.faq-a{overflow:hidden;max-height:0;transition:max-height .5s var(--ease)}
+.faq-a .inner{padding:0 4px 23px;color:var(--ink-2);max-width:66ch;font-size:.96rem}
+.faq-a a{border-bottom:1px solid var(--line);color:var(--ink)}
+.faq-a a:hover{border-color:#fff}
+.faq-a code{font-family:var(--font-mono);font-size:.84em;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line-2);border-radius:5px;padding:.05rem .3rem}
+
+/* ---------- final ---------- */
+.final{margin-top:clamp(82px,10vw,130px);border-top:1px solid var(--line-2);padding:clamp(68px,9vw,116px) 0;text-align:center;position:relative;overflow:hidden}
+.final::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 320px at 50% 120%,rgba(255,255,255,.06),transparent 70%);pointer-events:none}
+.final .h2{position:relative}
+.final .lead{margin:20px auto 0;position:relative}
+.final .hero-cta{margin-top:30px;justify-content:center;opacity:1;animation:none;position:relative}
+.final .invite-url{margin-top:18px;font-family:var(--font-mono);font-size:.8rem;color:var(--ink-3);position:relative;word-break:break-all}
+
+/* ---------- footer ---------- */
+.foot{border-top:1px solid var(--line-2);padding:60px 0 42px;position:relative;z-index:2}
+.foot-top{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:40px}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-3);font-size:.9rem;max-width:36ch}
+.ascii{margin-top:24px;font-family:var(--font-mono);font-size:clamp(.38rem,1vw,.68rem);line-height:1.15;color:rgba(255,255,255,.22);white-space:pre;letter-spacing:0}
+.foot-col .fl{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px}
+.foot-col a,.foot-col span{display:block;color:var(--ink-2);font-size:.9rem;padding:6px 0;transition:color .25s}
+.foot-col span span{display:inline;padding:0}
+.foot-col a:hover{color:#fff}
+.foot-bot{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-top:52px;padding-top:24px;border-top:1px solid var(--line-2);color:var(--ink-3);font-size:.8rem}
+.foot-bot .mono{font-size:.76rem}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,140%);z-index:150;
+  background:#fff;color:#0a0a0b;padding:12px 20px;border-radius:var(--r-full);font-weight:600;font-size:.9rem;
+  display:flex;align-items:center;gap:9px;box-shadow:0 20px 50px -18px rgba(0,0,0,.9);transition:transform .55s var(--ease)}
+.toast.show{transform:translate(-50%,0)}
+.toast svg{width:17px;height:17px}
+
+/* ---------- reveal ---------- */
+.js .reveal{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.js .reveal.in{opacity:1;transform:none}
+
+/* ---------- responsive ---------- */
+@media (max-width:1040px){
+  .ess-hero{grid-template-columns:1fr}
+  .trap{grid-template-columns:1fr;gap:36px}
+  .hero-grid{grid-template-columns:1fr;gap:46px}
+  .hero-copy{max-width:none}
+  .signal{max-width:420px}
+  .add-grid{grid-template-columns:1fr}
+  .faq-grid{grid-template-columns:1fr;gap:30px}
+  .spot{grid-template-columns:1fr;gap:14px}
+}
+@media (max-width:900px){
+  .nav-links,.nav-cta{display:none}
+  .nav-toggle{display:flex}
+  .mobile-menu{display:block;position:fixed;inset:68px 0 auto 0;z-index:99;background:rgba(10,10,11,.96);
+    backdrop-filter:blur(18px);border-bottom:1px solid var(--line);transform:translateY(-130%);transition:transform .5s var(--ease);padding:14px 0 22px}
+  .mobile-menu.open{transform:none}
+  .mobile-menu a{display:block;padding:14px 24px;font-family:var(--font-display);font-size:1.12rem;font-weight:500;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
+  .mobile-menu .btn{margin:18px 24px 0;width:calc(100% - 48px);justify-content:center}
+  .bento{grid-template-columns:1fr}
+  .card--w3,.card--w2{grid-column:auto}
+  .facts{grid-template-columns:1fr}
+  .foot-top{grid-template-columns:1fr 1fr}
+  .foot-brand{grid-column:1/-1}
+  .pb-stats{margin-left:0;width:100%;border-top:1px solid var(--line-2);padding-top:18px}
+  .pb-bio .btn{margin-left:0}
+}
+@media (max-width:760px){
+  .essentials{grid-template-columns:1fr}
+  .cmd-list{grid-template-columns:1fr}
+  .prefix-strip{grid-template-columns:1fr}
+}
+@media (max-width:620px){
+  .wrap{padding:0 18px}
+  .trap-log-row{grid-template-columns:1fr;gap:5px}
+  .trap-step{grid-template-columns:42px 1fr;gap:15px}
+  .trap-n{width:42px;height:42px;font-size:.7rem}
+  .trap-step::before{left:20px;top:46px}
+  .hero{padding-top:120px}
+  .hero-cta .btn{width:100%;justify-content:center}
+  .signal{max-width:340px}
+  .orbit{font-size:.66rem;padding:.34rem .55rem}
+  .orbit.left,.orbit.right{display:none}
+  .foot-top{grid-template-columns:1fr}
+  .ascii{font-size:.32rem}
+  .pb-in{gap:16px}
+  .cmd .cname{min-width:86px}
+  .cmd-toolbar{padding:13px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .hero .display .line > span{transform:none}
+  .hero-sub,.hero-cta,.hero-facts,.hero-visual{opacity:1}
+  .reveal{opacity:1;transform:none}
+  .marquee-track{animation:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#top" aria-label="Pulsar home">
+      <span class="mark"><img src="../pulsar-avatar.png" alt=""></span>
+      Pulsar
+      <span class="bot-pill">Bot</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#essentials" data-spy="essentials">Essentials</a>
+      <a href="#features" data-spy="features">What it does</a>
+      <a href="#commands" data-spy="commands">Commands</a>
+      <a href="#builders" data-spy="builders">Builders</a>
+      <a href="#add" data-spy="add">Add to server</a>
+      <a href="#faq" data-spy="faq">FAQ</a>
+      <a class="back" href="../">&larr; Hyperion</a>
+    </nav>
+    <a class="btn btn-primary btn-sm nav-cta" href="#add">
+      Add Pulsar
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</header>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#essentials">Essentials</a>
+  <a href="#features">What it does</a>
+  <a href="#commands">Commands</a>
+  <a href="#builders">Builders</a>
+  <a href="#add">Add to server</a>
+  <a href="#faq">FAQ</a>
+  <a href="../">Back to Hyperion</a>
+  <a class="btn btn-primary" href="#add">Add Pulsar</a>
+</div>
+
+<main id="main">
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="sig" aria-hidden="true"></span>Pulsar · Hyperion's bot on Yapper</span>
+        <h1 class="display">
+          <span class="line"><span>The whole server,</span></span>
+          <span class="line"><span class="muted">in one bot.</span></span>
+        </h1>
+        <p class="lead hero-sub">159 commands for moderation, tickets, giveaways, games, coins and the small things in between — rebuilt from the ground up on Yapper's official bot API. It carries the <b style="color:var(--ink);font-weight:500">✓ BOT</b> tag, so nobody mistakes it for a person.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary" id="copyBotHero" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.4"/><path d="M5.5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v.5"/></svg>
+            Copy bot code
+          </button>
+          <a class="btn btn-ghost" href="#commands">
+            Browse all 159 commands
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+        <div class="hero-facts">
+          <span>Free to add</span>
+          <span class="dot" aria-hidden="true"></span>
+          <span>No setup beyond a role</span>
+          <span class="dot" aria-hidden="true"></span>
+          <span>Start with <code>p!help</code></span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="signal" role="img" aria-label="Pulsar's avatar at the centre of a rotating signal, with sample commands around it.">
+          <span class="ring r1"></span>
+          <span class="ring r2"></span>
+          <span class="ring r3"></span>
+          <span class="ticks" aria-hidden="true"></span>
+          <span class="beam" aria-hidden="true"></span>
+          <span class="glow" aria-hidden="true"></span>
+          <span class="orbit top"><span class="p">p!</span><b>help</b></span>
+          <span class="orbit right"><span class="p">p!</span><b>ticket</b></span>
+          <span class="orbit bottom"><span class="p">p!</span><b>giveaway</b></span>
+          <span class="orbit left"><span class="p">p!</span><b>rank</b></span>
+          <span class="core"><img src="../pulsar-avatar.png" alt="Pulsar"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- profile band -->
+    <div class="profile-band reveal">
+      <div class="pb-banner">
+        <img src="../pulsar-banner.webp" alt="" onerror="this.style.display='none'">
+      </div>
+      <div class="pb-in">
+        <span class="pb-ava"><img src="../pulsar-avatar.png" alt="Pulsar's avatar"></span>
+        <div class="pb-id">
+          <div class="pb-name">Pulsar <span class="pb-bot">Bot</span></div>
+          <div class="pb-handle">@pulsar · Hyperion · Yapper</div>
+        </div>
+        <div class="pb-stats">
+          <div class="pb-stat"><b>159</b><span>commands</span></div>
+          <div class="pb-stat"><b>8</b><span>categories</span></div>
+          <div class="pb-stat"><b>50</b><span>in the / menu</span></div>
+          <div class="pb-stat"><b>Free</b><span>to add</span></div>
+        </div>
+      </div>
+      <div class="pb-in" style="margin-top:0;display:block">
+        <div class="pb-bio">
+          <p>Hyperion's companion bot, and a bot you can borrow. Moderation that checks who is asking, private ticket channels, reaction roles, giveaways that survive a restart, and more games than any server needs.</p>
+          <a class="btn btn-ghost btn-sm" href="#add">Add it to your server</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" id="track">
+      <span class="pill"><span class="dot"></span>Moderation</span>
+      <span class="pill"><span class="dot"></span>Tickets</span>
+      <span class="pill"><span class="dot"></span>Reaction roles</span>
+      <span class="pill"><span class="dot"></span>Giveaways</span>
+      <span class="pill"><span class="dot"></span>Automod</span>
+      <span class="pill"><span class="dot"></span>Honeypot</span>
+      <span class="pill"><span class="dot"></span>Coins</span>
+      <span class="pill"><span class="dot"></span>Levels</span>
+      <span class="pill"><span class="dot"></span>Wordle</span>
+      <span class="pill"><span class="dot"></span>Counting</span>
+      <span class="pill"><span class="dot"></span>Reminders</span>
+      <span class="pill"><span class="dot"></span>Welcome cards</span>
+      <span class="pill"><span class="dot"></span>Developer tools</span>
+      <span class="pill"><span class="dot"></span>Media scan</span>
+      <span class="pill"><span class="dot"></span>Price watches</span>
+      <span class="pill"><span class="dot"></span>Modules</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ESSENTIALS ============ -->
+<section class="sec" id="essentials">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow"><span class="sig" aria-hidden="true"></span>Start here · the essentials</span>
+      <h2 class="h2">Five things <span class="muted">every server actually needs.</span></h2>
+      <p class="lead">A community can run on five features: one trap channel for the raids, games people actually play, levels worth climbing, coins worth spending, and the utility commands you would otherwise keep a browser tab open for.</p>
+    </div>
+
+    <div class="essentials">
+      <article class="card ess-hero reveal">
+        <div>
+          <h3 class="card-ttl">Honeypot</h3>
+          <p class="card-txt">A trap channel. Put it where a spam bot or a raider will find it, tell your members to stay out, and leave it empty on purpose. Everything posted in it is deleted, and the account behind it is dealt with before your chat ever sees the spam.</p>
+          <ul class="card-list">
+            <li>The message is removed on sight</li>
+            <li>Punishment is yours: kick, ban, timeout or report only</li>
+            <li>Staff get an alert naming the account and what was done</li>
+            <li>Only the server owner can arm it</li>
+          </ul>
+        </div>
+        <div class="ess-cmds">
+          <div class="ess-lbl">Arm it in four lines</div>
+          <div class="ess-cmd"><code>p!honeypot channel #honeypot</code><span>The channel nobody should post in</span></div>
+          <div class="ess-cmd"><code>p!honeypot action kick</code><span>kick (default) · ban · timeout 60 · none</span></div>
+          <div class="ess-cmd"><code>p!honeypot alerts #staff</code><span>Where the catch report lands</span></div>
+          <div class="ess-cmd"><code>p!honeypot catches</code><span>The ten most recent, newest first</span></div>
+          <p class="ess-note">A timeout takes minutes, up to seven days. <code>delete</code> and <code>notify</code> control the cleanup and the DM. Both stay on unless you turn them off.</p>
+          <a class="ess-more" href="#honeypot">See what happens, step by step
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <div class="ess-top">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01"/></svg></span>
+          <div class="ess-fig"><b>52</b><span>commands</span></div>
+        </div>
+        <h3 class="card-ttl">Fun that gets used</h3>
+        <p class="card-txt">Fifty-two commands, and the ones people open every day. Quick one-liners, games that run in the channel, and enough responses that nobody has seen them all.</p>
+        <div class="ess-tags">
+          <code>8ball</code><code>wordle</code><code>slap</code><code>hug</code><code>truthordare</code><code>tictactoe</code><code>hangman</code><code>trivia</code><code class="more">+44 more</code>
+        </div>
+        <div class="card-note">Games stay in their channel, so two can run at once</div>
+      </article>
+
+      <article class="card reveal">
+        <div class="ess-top">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l5-5 4 4 7-8"/><path d="M15 8h5v5"/></svg></span>
+          <div class="ess-fig"><b>2</b><span>commands</span></div>
+        </div>
+        <h3 class="card-ttl">Levels, nothing to learn</h3>
+        <p class="card-txt">Messages earn XP in the background. There is no dashboard, no setup and no third command to remember: <code>p!rank</code> shows your card, <code>p!levels</code> shows the server's leaderboard.</p>
+        <div class="ess-tags"><code>rank</code><code>levels</code></div>
+        <div class="card-note">Two commands is the whole feature</div>
+      </article>
+
+      <article class="card reveal">
+        <div class="ess-top">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="6" ry="2.5"/><path d="M6 6v6c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V6"/><path d="M6 12v6c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-6"/></svg></span>
+          <div class="ess-fig"><b>10</b><span>commands</span></div>
+        </div>
+        <h3 class="card-ttl">Coins worth spending</h3>
+        <p class="card-txt">A wallet with a daily streak that is easy to keep and hard to break. Work for it, beg for it, pay each other, rob the unlucky, and lose the lot in slots or roulette.</p>
+        <div class="ess-tags"><code>daily</code><code>work</code><code>pay</code><code>rob</code><code>slots</code><code>roulette</code><code>richest</code><code class="more">+3 more</code></div>
+        <div class="card-note">One wallet, the same in every server</div>
+      </article>
+
+      <article class="card reveal">
+        <div class="ess-top">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 1 5 5l-8.2 8.2-5-5 8.2-8.2z"/><path d="M3.5 20.5l3-3"/></svg></span>
+          <div class="ess-fig"><b>60</b><span>commands</span></div>
+        </div>
+        <h3 class="card-ttl">The utility workhorses</h3>
+        <p class="card-txt">AFK status, avatars and banners, base64, server info, unit conversion, maths, reminders, saved tags and polls. The quiet commands you reach for between conversations.</p>
+        <div class="ess-tags"><code>afk</code><code>avatar</code><code>banner</code><code>base64</code><code>serverinfo</code><code>convert</code><code>remind</code><code>poll</code><code class="more">+52 more</code></div>
+        <div class="card-note">No menus to hunt through, every one has a name</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE TRAP, STEP BY STEP ============ -->
+<section class="sec" id="honeypot">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow"><span class="sig" aria-hidden="true"></span>Honeypot · a step by step explanation</span>
+      <h2 class="h2">Someone posts. <span class="muted">Five things happen.</span></h2>
+      <p class="lead">This is the order the bot works in.</p>
+    </div>
+
+    <div class="trap">
+      <ol class="trap-steps">
+        <li class="trap-step key reveal">
+          <span class="trap-n">01</span>
+          <div>
+            <div class="trap-t">It is written down first</div>
+            <p class="trap-d">The catch is recorded before anything else is even attempted: who they are, what they typed, when, and what this server chose to do about it.</p>
+            <p class="trap-d">One entry, patched with the outcome afterwards rather than a second line underneath it. A log that lists the same intrusion twice, once as unknown and once as handled, is worse than either.</p>
+          </div>
+        </li>
+
+        <li class="trap-step reveal">
+          <span class="trap-n">02</span>
+          <div>
+            <div class="trap-t">The message goes</div>
+            <p class="trap-d">Deleted, because a trap that leaves the spam sitting in the channel has not done anything about the spam.</p>
+          </div>
+        </li>
+
+        <li class="trap-step reveal">
+          <span class="trap-n">03</span>
+          <div>
+            <div class="trap-t">The punishment fires</div>
+            <p class="trap-d">Whatever you chose with <code>p!honeypot action</code>. A <b>kick</b> is the default: somebody in a channel called honeypot is not there by accident, but they are usually a bot or a spammer rather than somebody who deserves a permanent ban for one message. <b>Ban</b> and <b>timeout</b> are there to be picked deliberately. A timeout runs for as many minutes as you set, up to a week.</p>
+            <p class="trap-d"><b>Report only</b> is another option: the message still goes, nothing happens to the poster, and a human decides the rest.</p>
+          </div>
+        </li>
+
+        <li class="trap-step reveal">
+          <span class="trap-n">04</span>
+          <div>
+            <div class="trap-t">They are told why</div>
+            <p class="trap-d">One direct message: that they posted in a channel which only exists to catch spam, what happened to them, and to ask a human if that came as a surprise.</p>
+            <p class="trap-d">It goes after the punishment on purpose. Once somebody is kicked or banned there is no shared server left to send it through, which makes it best-effort by nature rather than by choice. A kick with no explanation is how somebody spends an afternoon convinced the server is broken.</p>
+          </div>
+        </li>
+
+        <li class="trap-step reveal">
+          <span class="trap-n">05</span>
+          <div>
+            <div class="trap-t">Staff get the alert</div>
+            <p class="trap-d">Into the channel you named, or into the trap itself if you never named one. It quotes what they typed as plain text, and it says what was <b>actually done</b>, not what was intended.</p>
+            <p class="trap-d">If a step failed, the alert says so and names the permission that is probably missing.</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="trap-side">
+        <div class="trap-card alert reveal">
+          <span class="trap-lbl">What lands in #staff</span>
+          <div class="trap-head">
+            <span class="trap-bar" aria-hidden="true"></span>
+            <div>
+              <div class="trap-alert-ttl">🪤 Somebody posted in the honeypot</div>
+              <p class="trap-alert-sub">@spammer posted in #honeypot.</p>
+            </div>
+          </div>
+          <dl class="trap-rows">
+            <div class="trap-row"><dt>When</dt><dd>12:34</dd></div>
+            <div class="trap-row"><dt>Message</dt><dd>“totallynotascamwebsite.com”</dd></div>
+            <div class="trap-row"><dt>What I did</dt><dd><span class="ok">✅ deleted the message</span><br><span class="ok">✅ banned from the server</span></dd></div>
+            <div class="trap-row"><dt>Told them</dt><dd>yes, by direct message</dd></div>
+          </dl>
+          <p class="trap-alert-foot">Pulsar acted on its own, so nobody here has to. Change it with the honeypot command.</p>
+        </div>
+
+        <div class="trap-card reveal">
+          <span class="trap-lbl">And the log it leaves, p!honeypot catches</span>
+          <div class="trap-log">
+            <div class="trap-log-row"><span><b>@spammer</b> — totallynotascamwebsite.com</span><span class="st">✅ handled · 2 minutes ago</span></div>
+            <div class="trap-log-row"><span><b>@raidbot</b> — a</span><span class="st">✅ handled · 6 hours ago</span></div>
+            <div class="trap-log-row"><span><b>@tourist</b> — hi</span><span class="st">🚨 reported · yesterday</span></div>
+          </div>
+          <p class="trap-alert-foot">The ten most recent are shown, newest first; only the newest 20 are kept. Each line ends in what happened to that catch: handled, not handled, or reported only.</p>
+        </div>
+
+        <div class="trap-card reveal">
+          <span class="trap-lbl">Who never lands in the trap</span>
+          <ul class="trap-guards">
+            <li>The server owner</li>
+            <li>Pulsar itself</li>
+            <li>Everyone in every other channel, and everyone at all while the trap is off</li>
+          </ul>
+          <p class="trap-alert-foot">A command typed into the trap is punished and never answered. The trap does not chat back. Silence in the channel is the point; the alert is the only output.</p>
+        </div>
+
+        <div class="trap-card reveal">
+          <span class="trap-lbl">What it asks of you</span>
+          <ul class="trap-guards">
+            <li>A role for Pulsar above the people it acts on, with Manage messages and the matching Kick, Ban or Timeout members</li>
+            <li>A channel everyone can see on join.</li>
+            <li>The server owner to arm it: not administrators and not a role, because this is one decision to act on whoever posts, so one person answers for it</li>
+            <li>Nothing beyond Manage messages if you set it to report only</li>
+          </ul>
+          <p class="trap-alert-foot">Failures close rather than open: if Pulsar cannot read who owns the server, it will not arm a trap on your word alone. And picking the trap channel switches it on. <code>p!honeypot off</code> takes it back off.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="sec" id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow"><span class="sig" aria-hidden="true"></span>What's inside</span>
+      <h2 class="h2">Less setup. <span class="muted">More server.</span></h2>
+      <p class="lead">Pulsar started as a Discord bot, moved to Yapper, and was rebuilt once the platform grew a real bot API. Everything below is a command, not a promise.</p>
+    </div>
+
+    <div class="bento">
+      <article class="card card--w3 reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.4c0 4.3-2.9 7.2-7 8.6-4.1-1.4-7-4.3-7-8.6V6l7-3z"/><path d="M9 12l2.2 2.2L15 10.4"/></svg></span>
+        <h3 class="card-ttl">Moderation that means it</h3>
+        <p class="card-txt"><code>ban</code> <code>kick</code> <code>timeout</code> <code>warn</code> <code>clear</code> <code>nickname</code> <code>role</code> <code>slowmode</code> <code>lock</code> <code>hide</code> <code>pin</code> and every one checks the caller's roles before it acts. If it cannot read them, nothing happens.</p>
+        <ul class="card-list">
+          <li>26 commands under one shield</li>
+          <li>Fails closed, never open</li>
+          <li>Warnings are recorded and read back</li>
+        </ul>
+      </article>
+
+      <article class="card card--w3 reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M20 8V6a2 2 0 0 0-2-2h-2M4 16v2a2 2 0 0 0 2 2h2M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M9 9h6v6H9z"/></svg></span>
+        <h3 class="card-ttl">Tickets are real channels</h3>
+        <p class="card-txt">Each ticket is a private channel in a <code>Tickets</code> category, open to whoever asked, the staff roles and Pulsar. A panel card can carry up to ten categories — Support, Applications, Reports — and nobody has to learn the command. A member of staff claims a ticket; closing writes an HTML transcript, and a quiet one closes itself.</p>
+        <ul class="card-list">
+          <li>p!ticket panel #support</li>
+          <li>Open, close, reopen, delete</li>
+          <li>Claim it, so two staff do not answer at once</li>
+          <li>An HTML transcript when it closes</li>
+          <li>Auto-close after a set silence</li>
+          <li>The opener gets a DM</li>
+        </ul>
+      </article>
+
+      <article class="card card--w2 reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 9.7l5.4-.8L12 4z"/></svg></span>
+        <h3 class="card-ttl">Reaction roles</h3>
+        <p class="card-txt">Set up a panel, add a role per emoji, and reacting hands it out. Un-reacting takes it back. The panel is edited in place as you add roles, so the list on screen is always current.</p>
+      </article>
+
+      <article class="card card--w2 reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16v11H4z"/><path d="M2 9h20M12 9v11"/><path d="M12 9S9.5 3.5 7 5.5 12 9 12 9zM12 9s2.5-5.5 5-3.5S12 9 12 9z"/></svg></span>
+        <h3 class="card-ttl">Giveaways that survive</h3>
+        <p class="card-txt"><code>p!giveaway start 10m A prize</code> posts the entry, draws on a timer and can reroll. Entries and the deadline live on disk, so a restart mid-giveaway does not wipe them.</p>
+      </article>
+
+      <article class="card card--w2 reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="4.5"/><path d="M13.4 7.2c2.4.4 4.1 2.2 4.1 4.4 0 2.5-2.2 4.5-5 4.5-.5 0-1-.1-1.4-.2"/><path d="M3 20.5c1-2.6 3-4 5.5-4s4.5 1.4 5.5 4"/></svg></span>
+        <h3 class="card-ttl">Coins &amp; levels</h3>
+        <p class="card-txt">A global wallet with daily streaks, work, beg, pay, rob, slots, roulette and blackjack. Ordinary messages earn XP; <code>p!rank</code> shows the climb and <code>p!levels</code> the leaderboard.</p>
+      </article>
+
+      <article class="card card--w3 reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="12" rx="3"/><path d="M8 12h.01M16 12h.01M8.5 16h7"/><path d="M7.5 7l1-3h7l1 3"/></svg></span>
+        <h3 class="card-ttl">Games in the channel</h3>
+        <p class="card-txt">Hangman, Wordle, tic-tac-toe, Connect Four, number guess, blackjack and Akinator — fifty characters, twenty questions, and a wrong guess taken out before it carries on. Each one lives in the channel it started in, so two can run side by side, and each can be stopped by name. Trivia has 40 questions and a global scoreboard.</p>
+        <ul class="card-list">
+          <li>p!hangman · p!wordle · p!tictactoe</li>
+          <li>p!trivia · p!answer · p!trivia top</li>
+          <li>p!connect4 @someone · p!akinator</li>
+          <li>No menus, no reaction spam</li>
+        </ul>
+      </article>
+
+      <article class="card card--w3 reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18V9M9 18V5M14 18v-6M19 18v-9"/><path d="M2.5 21h19"/></svg></span>
+        <h3 class="card-ttl">Automod &amp; honeypots</h3>
+        <p class="card-txt">Eight automod rules — mass mentions, invite links, mention floods, repeats (near-duplicates included), emoji floods, text spam, caps and the link filter, which sees through lookalike domains (<code>d1scord.com</code>), adult hosts, shorteners and raw IPs. Report by default, or delete and timeout on request. <code>p!mediascan</code> checks attachments too: a program wearing a <code>photo.png.exe</code> name, or a file named after something it is not. A honeypot is a trap channel: post in it and the message goes, then the poster gets whatever you chose.</p>
+        <ul class="card-list">
+          <li>p!honeypot action kick | ban | timeout 60 | none</li>
+          <li>Only the server owner arms a honeypot</li>
+          <li>Staff are told who, and what was done</li>
+          <li><code>p!automod links allow add example.com/docs</code></li>
+          <li><code>p!mediascan on</code> · <code>p!mediascan action delete</code></li>
+        </ul>
+        <a class="ess-more" href="#honeypot">The full sequence, step by step
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </a>
+      </article>
+
+      <article class="card card--w3 reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4V5z"/><path d="M8 10h8M8 13h5"/></svg></span>
+        <h3 class="card-ttl">Welcome &amp; counting</h3>
+        <p class="card-txt">Real join events make a real greeter possible: your channel, your wording. The counting channel keeps one number at a time in order, names whoever broke it, keeps the high score across restarts, and ignores everything that is not a number.</p>
+        <ul class="card-list">
+          <li>p!welcome #general</li>
+          <li>p!counting #counting</li>
+          <li>High scores survive restarts</li>
+        </ul>
+      </article>
+
+      <article class="card card--w3 reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 1 5 5l-8.2 8.2-5-5 8.2-8.2z"/><path d="M3.5 20.5l3-3"/></svg></span>
+        <h3 class="card-ttl">Tools for the small things</h3>
+        <p class="card-txt">Half the bot is quiet usefulness: unit conversion, a real expression evaluator, a colour preview, a timezone clock, reminders, saved snippets, polls and AFK status — and the long-running tools, temporary roles, sticky notices, scheduled messages and live member counters. Sixty utility commands, none of them a menu hunt.</p>
+        <ul class="card-list">
+          <li>p!convert 10 km mi · p!math (4+6)*3</li>
+          <li>p!hash · p!uuid · p!password 20 · p!json</li>
+          <li>p!remind 30m standup · p!tags send rules</li>
+          <li>p!poll &lt;question&gt; · p!afk · p!define</li>
+          <li>p!temprole @user 30d VIP · p!sticky Welcome</li>
+          <li>p!schedule in 2h Movie night · p!serverstats add members</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="prefix-strip reveal">
+      <div class="prefix"><div class="pc">p!help</div><div class="pl">Pulsar's own prefix, the one the help text uses</div></div>
+      <div class="prefix"><div class="pc">/help</div><div class="pl">Yapper's slash menu, 50 commands chosen by category</div></div>
+      <div class="prefix"><div class="pc">!help</div><div class="pl">The platform's bang form, same command underneath</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BUILDERS ============ -->
+<section class="sec" id="builders">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow"><span class="sig" aria-hidden="true"></span>Two pages · no dashboard</span>
+      <h2 class="h2">Build it here, <span class="muted">paste one line.</span></h2>
+      <p class="lead">A bot cannot serve a page on Yapper, so these are plain files on this site: nothing to connect, no account, no install. Write it, copy the command it produces, paste it into the channel Pulsar reads.</p>
+    </div>
+
+    <div class="bento">
+      <article class="card card--w3 reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg></span>
+        <h3 class="card-ttl">Custom command builder</h3>
+        <p class="card-txt">A response with variables — <code>{user}</code>, <code>{server.member_count}</code>, <code>{channel}</code>, <code>{args}</code> — a live preview, and the exact <code>p!cc add</code> line. Aliases included, as the second command to paste.</p>
+        <a class="ess-more" href="custom-command-builder/">Open the command builder
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </a>
+      </article>
+
+      <article class="card card--w3 reveal">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 10h10M7 14h6"/></svg></span>
+        <h3 class="card-ttl">Embed builder</h3>
+        <p class="card-txt">Title, description, fields, colour picker, author, footer and pictures, with a preview that looks like the card Yapper draws — and the finished JSON as one <code>p!embed</code> command.</p>
+        <a class="ess-more" href="embed-builder/">Open the embed builder
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </a>
+      </article>
+    </div>
+
+    <div class="prefix-strip reveal">
+      <div class="prefix"><div class="pc">p!cc add rules …</div><div class="pl">Writes every variable for you, and the alias line if you use one</div></div>
+      <div class="prefix"><div class="pc">p!embed {…}</div><div class="pl">Validates as you type: ten fields, the 6,000-character budget, the hosts Yapper serves</div></div>
+      <div class="prefix"><div class="pc">Nothing leaves the page</div><div class="pl">No requests, no storage on a server — a draft can sit in your browser and nowhere else</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMMANDS ============ -->
+<section class="sec" id="commands">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow"><span class="sig" aria-hidden="true"></span>The index</span>
+      <h2 class="h2">Every command, <span class="muted">nothing hidden.</span></h2>
+      <p class="lead">All 159 of them. Search by name or by what you want to do, or narrow it to a category. Click a command to copy it.</p>
+    </div>
+
+    <div class="cmd-box reveal">
+      <div class="cmd-toolbar">
+        <label class="cmd-search">
+          <span class="sr-only">Search commands</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+          <input type="search" id="cmdSearch" placeholder="Search commands — by name, description or category" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="cmd-chips" id="cmdChips" role="group" aria-label="Filter by category"></div>
+      </div>
+      <div class="cmd-list" id="cmdList" role="list"></div>
+      <div class="cmd-foot">
+        <span><b id="cmdCount">159</b> commands shown · click one to copy <span class="mono">p!name</span></span>
+        <span class="mono">p!help &lt;command&gt; explains one in chat</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SPOTLIGHTS ============ -->
+<section class="sec" id="details">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow"><span class="sig" aria-hidden="true"></span>Under the hood</span>
+      <h2 class="h2">Built to be trusted <span class="muted">with the keys.</span></h2>
+      <p class="lead">A bot that can ban people has to be careful about who it listens to. These are the decisions that shaped the rest of it.</p>
+    </div>
+
+    <div class="spots">
+      <div class="spot reveal">
+        <div>
+          <div class="s-k">01 · Permissions</div>
+          <div class="s-t">It checks the caller, then itself.</div>
+        </div>
+        <div>
+          <p class="s-d">Every moderation command asks Yapper what the person who typed it is allowed to do, <code>ban_members</code> for <code>p!ban</code>, <code>manage_messages</code> for <code>p!clear</code>, <code>manage_nicknames</code> for <code>p!nickname</code>. The action then runs with Pulsar's own roles, exactly as it would for a person.</p>
+          <p class="s-d">If the roles cannot be read, the answer is "I could not check" and nothing happens. Failing open would hand <code>p!ban</code> to anyone who can type it.</p>
+          <p class="s-quote">Give Pulsar a role above the ones it should manage. Without one it can read, post, react and DM. And nothing else.</p>
+        </div>
+      </div>
+
+      <div class="spot reveal">
+        <div>
+          <div class="s-k">02 · State</div>
+          <div class="s-t">A restart is not a reset.</div>
+        </div>
+        <div>
+          <p class="s-d">Giveaways, polls, reminders, tags, warnings, the greeter's settings, the counting high score and everyone's daily streak all outlive a restart of the bot. A giveaway that forgets its entries the moment the process cycles is worse than no giveaway at all.</p>
+          <p class="s-d">So a week-long reminder still arrives, yesterday's giveaway still draws its winner, and nobody loses a streak because the bot blinked. None of that asks you to run a database.</p>
+        </div>
+      </div>
+
+      <div class="spot reveal">
+        <div>
+          <div class="s-k">03 · Footprint</div>
+          <div class="s-t">Nothing for you to install.</div>
+        </div>
+        <div>
+          <p class="s-d">Pulsar runs for you. There is no container to deploy, no configuration file to fill in and nothing on your side to keep patched. You add it, give it a role, and type <code>p!help</code>. That is the entire footprint.</p>
+          <p class="s-d">The math command's evaluator is a real tokenizer and parser rather than <code>eval</code>, because the input is whatever a stranger types into somebody else's server. Decisions like that are why it can be handed a moderator's power at all.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ADD ============ -->
+<section class="sec" id="add">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow"><span class="sig" aria-hidden="true"></span>Take it with you</span>
+      <h2 class="h2">Add Pulsar <span class="muted">to your server.</span></h2>
+      <p class="lead">No invite link. A server manager adds Pulsar by its code in two taps, then gives it a role so it can do its job.</p>
+    </div>
+
+    <div class="add-grid">
+      <ol class="steps reveal">
+        <li class="step">
+          <span class="sn">01</span>
+          <div>
+            <div class="st">Copy the bot code</div>
+            <div class="sd">The card beside this holds it. It's also what <code>p!invite</code> prints, so you never have to hunt for it.</div>
+          </div>
+        </li>
+        <li class="step">
+          <span class="sn">02</span>
+          <div>
+            <div class="st">Add it from server settings</div>
+            <div class="sd">Server settings → Bots → Your bots → Add, then paste the code. Once Pulsar is on the public list it will also be under Community bots.</div>
+          </div>
+        </li>
+        <li class="step">
+          <span class="sn">03</span>
+          <div>
+            <div class="st">Say hello</div>
+            <div class="sd">Type <code>p!help</code> for all command categories in one message, <code>p!help {command}</code> for one, or <code>/help</code> from the slash menu.</div>
+          </div>
+        </li>
+        <li class="step">
+          <span class="sn">04</span>
+          <div>
+            <div class="st">Give it a role</div>
+            <div class="sd">Kick, pin, bulk delete and ticket channels all need the bot's own permissions. Add a role with those and put it above the roles it manages. Without one it can read, post, react and DM. Nothing else.</div>
+          </div>
+        </li>
+      </ol>
+
+      <div class="add-card reveal">
+        <div class="ac-top">
+          <span class="ava"><img src="../pulsar-avatar.png" alt=""></span>
+          <div>
+            <div class="ac-name">Pulsar <span class="ac-bot">Bot</span></div>
+            <div class="ac-sub">@pulsar</div>
+          </div>
+        </div>
+        <div class="ac-lbl">Bot code</div>
+        <code class="bot-code" id="botCode" tabindex="0" aria-label="Pulsar bot code">68229ea4-8772-44a2-bc0d-0ba7113935c2</code>
+        <button class="btn btn-primary" id="copyBot" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.4"/><path d="M5.5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v.5"/></svg>
+          Copy bot code
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="sec" id="faq">
+  <div class="wrap">
+    <div class="faq-grid">
+      <div class="sec-head reveal" style="max-width:none">
+        <span class="eyebrow"><span class="sig" aria-hidden="true"></span>Questions</span>
+        <h2 class="h2">Answers, <span class="muted">briefly.</span></h2>
+        <p class="lead">Anything else, ask in Hyperion. The people who build it are there.</p>
+        <a class="btn btn-ghost btn-sm" href="../" style="margin-top:22px">Back to Hyperion</a>
+      </div>
+
+      <div class="faq-list reveal" id="faqList">
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">What is Pulsar, exactly?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">A bot for Yapper, and Hyperion's own. It began as a Discord bot, was ported to Yapper, then rebuilt on Yapper's official bot API once that existed. 159 commands across 8 categories, with the ✓ BOT tag so it reads as a bot rather than a person.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Can I build my own commands and embeds?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">Yes — two pages, no dashboard and no account: the <a href="custom-command-builder/">custom command builder</a> and the <a href="embed-builder/">embed builder</a>. Each one writes the exact <code>p!cc add</code> or <code>p!embed</code> line for you to paste into a channel.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Is it free?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">Yes. Free to add, free to use, nothing to buy.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">How do I add it to my server?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">Copy the bot code <a href="#add">above</a>, then in Yapper go to Server settings → Bots → Your bots → Add and paste it. Bots only see and post in servers they were actually added to. Type <code>p!help</code> to confirm it is awake.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Why does it need a role? Isn't it a bot?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">On Yapper a bot's permissions come from its roles, exactly like a person's. A kick needs Kick members; a pin or bulk delete needs Manage messages; tickets need Manage channels. Without a role Pulsar can still read, post, react and DM — but it will not pretend to moderate. The role also has to sit above the roles it manages.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Does it work outside Hyperion?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">Yes — it is the same bot everywhere. Moderation is gated on your server's roles, and the server owner is the only one who can arm a honeypot. Economy and levels are global to the bot, so the same person is the same person in every server.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Is it open source? Can I host it myself?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">No. Pulsar isn't open source and isn't distributed to self-host — the bot running in Hyperion is the one you add to your own server. There is nothing to download, no container and no configuration file, which is also why there is no version of it for you to keep alive or keep patched.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">What does it store?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">The things its features need to work: wallets, XP, warnings, giveaways, polls, reminders, tags, the greeter's settings and the counting high score. It stays with the bot rather than in a database or a third-party service you would have to set up.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Something broke. Where do I say so?
+            <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          </button>
+          <div class="faq-a"><div class="inner">In <a href="https://yapper.website/invite/hyperion" target="_blank" rel="noopener">Hyperion</a>. A command that answers wrongly is more useful as a report than as a workaround, so bring the command and what you expected.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="final">
+  <div class="wrap">
+    <h2 class="h2 reveal">One bot. <span class="muted">Your server next.</span></h2>
+    <p class="lead reveal">Copy the code, add Pulsar, type <span class="mono" style="color:var(--ink)">p!help</span>. That is the whole setup.</p>
+    <div class="hero-cta reveal">
+      <button class="btn btn-primary" id="copyBotCta" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.4"/><path d="M5.5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v.5"/></svg>
+        Copy bot code
+      </button>
+      <a class="btn btn-ghost" href="https://yapper.website/invite/hyperion" target="_blank" rel="noopener">
+        Join Hyperion
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+    <div class="invite-url">yapper.website/invite/hyperion</div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a class="brand" href="#top">
+          <span class="mark"><img src="../pulsar-avatar.png" alt=""></span>
+          Pulsar
+          <span class="bot-pill">Bot</span>
+        </a>
+        <p>Hyperion's bot on Yapper. 159 commands, free to add, and a role to earn.</p>
+        <pre class="ascii" aria-hidden="true">█▀█ █░█ █░░ █▀ █▀█ █▀█
+█▀▀ █▄█ █▄▄ ▄█ █▀█ █▀▄</pre>
+      </div>
+      <div class="foot-col">
+        <div class="fl">Pulsar</div>
+        <a href="#features">What it does</a>
+        <a href="#commands">All 159 commands</a>
+        <a href="custom-command-builder/">Command builder</a>
+        <a href="embed-builder/">Embed builder</a>
+        <a href="#details">Under the hood</a>
+        <a href="#add">Add to server</a>
+      </div>
+      <div class="foot-col">
+        <div class="fl">Hyperion</div>
+        <a href="../">The server</a>
+        <a href="../#pulsar">Pulsar in Hyperion</a>
+        <a href="../#minecraft">Minecraft</a>
+        <a href="https://yapper.website/invite/hyperion" target="_blank" rel="noopener">Join Hyperion</a>
+      </div>
+      <div class="foot-col">
+        <div class="fl">Details</div>
+        <span>Prefix <span class="mono">p!</span> · <span class="mono">/</span> · <span class="mono">!</span></span>
+        <span>Free to add</span>
+        <span>No install needed</span>
+        <span>Built on Yapper's bot API</span>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span>© <span id="year">2026</span> Pulsar · made for Hyperion. Not affiliated with Yapper.</span>
+      <span class="mono">Signal acquired.</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
+  <span id="toastMsg">Copied</span>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ CONFIG ============ */
+  var BOT_CODE = "68229ea4-8772-44a2-bc0d-0ba7113935c2";
+  var JOIN_URL = "https://yapper.website/invite/hyperion";
+
+  /* ============ COMMAND INDEX ============ */
+  /* Name, description — straight from the bot's own registry. */
+  var CMD = {
+    Moderation: [
+      ["automod","Catch and act on spam, invites and mass mentions"],
+      ["ban","Ban someone, list bans, or lift one"],
+      ["bans","List the people banned from this server"],
+      ["clear","Bulk delete recent messages in this channel"],
+      ["createchannel","Create a text or voice channel"],
+      ["delchannel","Delete a channel (needs the word confirm)"],
+      ["dm","Send somebody a direct message"],
+      ["hide","Make this channel private"],
+      ["honeypot","Punish anyone who posts in a trap channel"],
+      ["kick","Remove someone from the server"],
+      ["lock","Stop people posting in this channel"],
+      ["mass","Give/remove a role, or kick/ban, for many people at once"],
+      ["mediascan","Check attachments for risky files, adult names and hidden text"],
+      ["modcase","Read a moderation case, or change its reason"],
+      ["modlog","Choose the channel for moderation and member logs"],
+      ["modules","Turn whole feature groups on or off"],
+      ["nickname","Change someone's nickname in this server"],
+      ["pin","Pin a message, or unpin one"],
+      ["raid","Detect join waves, check account age, and lock the server down"],
+      ["reactionrole","Give roles out from reactions on a message"],
+      ["role","Add or remove a role, or list them"],
+      ["slowmode","Set how slowly this channel may be used"],
+      ["timeout","Silence someone for a while, or clear it"],
+      ["unhide","Make a hidden channel visible again"],
+      ["unlock","Let people post in this channel again"],
+      ["warn","Give someone a warning, and read the record back"]
+    ],
+    Utility: [
+      ["afk","Set or clear your AFK status"],
+      ["age","Work out an age from a birthday"],
+      ["atbash","Swap each letter with its mirror (A↔Z)"],
+      ["avatar","View a user's avatar"],
+      ["banner","View a user's banner"],
+      ["base64","Base64 encoding and decoding"],
+      ["binary","Encode or decode binary"],
+      ["bmi","Work out a body mass index"],
+      ["caesar","Shift letters with the Caesar cipher"],
+      ["case","Change text case: snake, camel, title and more"],
+      ["channelinfo","Details about this channel"],
+      ["color","Show a colour preview"],
+      ["convert","Convert units: length, mass, volume, speed, temperature"],
+      ["counting","Run a counting channel: the next number, or start again"],
+      ["customcommand","Create your own commands with variables — no code"],
+      ["deals","Game price deals, and the cheapest listing for a title"],
+      ["dedupe","Remove duplicate lines or items"],
+      ["define","Get the definition of a word"],
+      ["embed","Post a rich card from JSON (see the embed builder)"],
+      ["freegames","Current free games, and automatic alerts for new ones"],
+      ["hash","Hash text with md5, sha1, sha256 or sha512"],
+      ["hex","Encode or decode hexadecimal"],
+      ["id","Look up a user, channel or server id"],
+      ["json","Format or minify JSON"],
+      ["jwt","Read the payload of a JWT (without verifying it)"],
+      ["math","Calculate an expression"],
+      ["membercount","How many people are in this server"],
+      ["morse","Encode or decode Morse code"],
+      ["password","Generate a strong random password"],
+      ["permissions","What somebody is allowed to do here"],
+      ["ping","Check Pulsar's latency and that it is awake"],
+      ["player","Look up a Minecraft, Valorant, Apex or Fortnite player"],
+      ["poll","Ask a question and tally the votes"],
+      ["qr","Generate or read a QR code"],
+      ["random","A random number in a range"],
+      ["regex","Test a regular expression against text"],
+      ["remind","Set a reminder"],
+      ["roleinfo","Details about a role"],
+      ["roman","Convert to and from Roman numerals"],
+      ["schedule","Send a message later, or on a repeating schedule"],
+      ["serverinfo","View information about this server"],
+      ["serverstats","Live member/booster counters in channel names"],
+      ["serverstatus","Check a Minecraft server: online, players, version, MOTD"],
+      ["shuffle","Shuffle a list of things"],
+      ["slug","Turn text into a URL-friendly slug"],
+      ["sort","Sort a list of things"],
+      ["stats","What Pulsar is holding right now"],
+      ["sticky","Keep a notice at the bottom of a channel"],
+      ["tags","Save snippets of text and replay them later"],
+      ["temprole","Give a role for a set time, and take it back automatically"],
+      ["ticket","Open and close private support tickets"],
+      ["time","Show the current time or describe a moment"],
+      ["tip","Work out a tip and split a bill"],
+      ["uptime","How long Pulsar has been running"],
+      ["url","Encode or decode a URL component"],
+      ["userinfo","View a user's profile"],
+      ["uuid","Generate random UUIDs"],
+      ["vote","Vote in a poll"],
+      ["wc","Count words, characters and lines"],
+      ["welcome","Greet new members (channel and wording)"]
+    ],
+    Fun: [
+      ["8ball","Consult the magic 8-ball"],
+      ["achievement","Award somebody a Minecraft-style achievement"],
+      ["akinator","Think of a character and let Pulsar guess in twenty questions"],
+      ["answer","Answer the current trivia question"],
+      ["blackjack","Play blackjack against the dealer"],
+      ["cat","Get a random cat picture"],
+      ["choose","Pick one option for you"],
+      ["coinflip","Flip a coin"],
+      ["compliment","Give somebody a genuine compliment"],
+      ["connect4","Play Connect Four against somebody or Pulsar"],
+      ["dadjoke","A joke of the highest dad quality"],
+      ["dance","Dance like nobody is watching"],
+      ["dog","Get a random dog picture"],
+      ["duel","Challenge somebody to a coin flip for coins"],
+      ["emojify","Turn text into emoji letters"],
+      ["fact","Share a random fact"],
+      ["fight","Stage a dramatic fight between two people"],
+      ["fortune","Open a fortune cookie"],
+      ["hack","Pretend to hack something"],
+      ["hangman","Play hangman in this channel"],
+      ["highfive","High-five somebody"],
+      ["horoscope","A horoscope for today"],
+      ["hug","Hug somebody"],
+      ["inspire","A small dose of motivation"],
+      ["joke","Tell a (terrible) joke"],
+      ["kiss","Kiss somebody"],
+      ["magicconch","Ask the magic conch shell"],
+      ["meme","Generate a meme with your own text"],
+      ["mock","Repeat text in a mocking case"],
+      ["neverhaveiever","A never-have-I-ever prompt"],
+      ["numberguess","Guess the number I am thinking of"],
+      ["pat","Give somebody a head pat"],
+      ["pickupline","A line that has never once worked"],
+      ["pun","A pun, freshly groan-tested"],
+      ["quote","Quote a random recent message from this channel"],
+      ["rate","Rates what you desire"],
+      ["riddle","A riddle with the answer hidden"],
+      ["rizz","Rate somebody’s rizz"],
+      ["roast","Playfully roast somebody"],
+      ["roll","Roll dice, e.g. 2d6 or d20"],
+      ["rps","Play rock, paper, scissors"],
+      ["ship","Ship two people together"],
+      ["slap","Slap somebody with something silly"],
+      ["tarot","Draw a tarot card"],
+      ["text","Transform text: mock, clap, reverse, vaporwave and more"],
+      ["tictactoe","Play tic-tac-toe against Pulsar"],
+      ["trivia","Answer a trivia question"],
+      ["truthordare","Get a truth question or a dare"],
+      ["uwu","UwUify some text"],
+      ["wanted","Make a wanted poster for somebody"],
+      ["wordle","Guess a five-letter word"],
+      ["wouldyourather","Would you rather…? A two-option poll"]
+    ],
+    Economy: [
+      ["balance","Show a coin balance"],
+      ["beg","Ask nicely for coins"],
+      ["daily","Claim your daily coins"],
+      ["gamble","Bet coins on a coin flip"],
+      ["pay","Send coins to somebody"],
+      ["richest","The richest people in the server"],
+      ["rob","Try to steal coins from somebody"],
+      ["roulette","Bet on red, black, green or a number"],
+      ["slots","Spin the slot machine"],
+      ["work","Do a shift for coins"]
+    ],
+    Levels: [
+      ["levels","The server XP leaderboard"],
+      ["rank","Show your level and XP"]
+    ],
+    Giveaways: [
+      ["enter","Enter the giveaway running in this server"],
+      ["giveaway","Run a giveaway: p!giveaway start 10m A prize"]
+    ],
+    Info: [
+      ["about","View info about Pulsar"],
+      ["commands","Every command, grouped by category"],
+      ["help","List every Pulsar command"],
+      ["invite","How to add Pulsar to your server"],
+      ["website","Pulsar's website and the developer's site"]
+    ],
+    Owner: [
+      ["access","Switch Pulsar between public use and owner only"],
+      ["say","Make Pulsar say something"]
+    ]
+  };
+  var CAT_ORDER = ["Moderation","Utility","Fun","Economy","Levels","Giveaways","Info","Owner"];
+  var ALL = [];
+  CAT_ORDER.forEach(function(cat){
+    CMD[cat].forEach(function(pair){
+      ALL.push({ name: pair[0], desc: pair[1], cat: cat });
+    });
+  });
+  var TOTAL = ALL.length;
+
+  /* ---- command explorer ---- */
+  var list = document.getElementById('cmdList');
+  var chips = document.getElementById('cmdChips');
+  var search = document.getElementById('cmdSearch');
+  var countEl = document.getElementById('cmdCount');
+  var activeCat = 'All';
+
+  function renderChips(){
+    var counts = { All: TOTAL };
+    CAT_ORDER.forEach(function(c){ counts[c] = CMD[c].length; });
+    var html = ['All'].concat(CAT_ORDER).map(function(c){
+      return '<button class="chip' + (c === activeCat ? ' on' : '') + '" type="button" data-cat="' + c + '" aria-pressed="' + (c === activeCat) + '">' +
+        c + '<span class="n">' + counts[c] + '</span></button>';
+    }).join('');
+    chips.innerHTML = html;
+  }
+
+  function renderList(){
+    var q = (search.value || '').trim().toLowerCase();
+    var out = [];
+    ALL.forEach(function(c){
+      if(activeCat !== 'All' && c.cat !== activeCat) return;
+      if(q && (c.name + ' ' + c.desc + ' ' + c.cat).toLowerCase().indexOf(q) === -1) return;
+      out.push(c);
+    });
+    if(!out.length){
+      list.innerHTML = '<div class="cmd-empty">No command matches “' + escapeHtml(search.value.trim()) + '”. Try <span class="mono">help</span>, <span class="mono">giveaway</span> or clear the filter.</div>';
+    } else {
+      list.innerHTML = out.map(function(c){
+        return '<button class="cmd" type="button" role="listitem" data-cmd="' + c.name + '" aria-label="Copy p!' + c.name + ' — ' + escapeAttr(c.desc) + '">' +
+          '<span class="cname"><span class="p">p!</span>' + c.name + '</span>' +
+          '<span class="cdesc">' + escapeHtml(c.desc) + '</span>' +
+        '</button>';
+      }).join('');
+    }
+    countEl.textContent = out.length;
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(ch){
+      return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[ch];
+    });
+  }
+  function escapeAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
+
+  renderChips();
+  renderList();
+
+  chips.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-cat]');
+    if(!btn) return;
+    activeCat = btn.getAttribute('data-cat');
+    renderChips();
+    renderList();
+    list.scrollTop = 0;
+  });
+  search.addEventListener('input', renderList);
+  search.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ search.value = ''; renderList(); } });
+
+  /* ---- toast + copy ---- */
+  var toast = document.getElementById('toast');
+  var toastMsg = document.getElementById('toastMsg');
+  var toastTimer;
+  function showToast(msg){
+    toastMsg.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 2200);
+  }
+  function copyText(text, okMsg){
+    if(!text){ showToast('Nothing to copy'); return; }
+    var done = function(){ showToast(okMsg); };
+    var fallback = function(){
+      var t = document.createElement('textarea');
+      t.value = text; t.setAttribute('readonly','');
+      t.style.position = 'absolute'; t.style.left = '-9999px';
+      document.body.appendChild(t); t.select();
+      try{ if(document.execCommand('copy')){ done(); } else { showToast('Copy failed'); } }
+      catch(e){ showToast('Copy failed'); }
+      document.body.removeChild(t);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  }
+
+  /* ---- click a command to copy it ---- */
+  list.addEventListener('click', function(e){
+    var row = e.target.closest('[data-cmd]');
+    if(!row) return;
+    var name = row.getAttribute('data-cmd');
+    copyText('p!' + name, 'p!' + name + ' copied');
+  });
+
+  /* ---- copy the bot code ---- */
+  ['copyBotHero','copyBot','copyBotCta'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.addEventListener('click', function(){ copyText(BOT_CODE, 'Bot code copied — paste it under Server settings → Bots'); });
+  });
+
+  /* ---- nav scroll state + scrollspy ---- */
+  var nav = document.getElementById('nav');
+  function onScroll(){ nav.classList.toggle('scrolled', window.scrollY > 12); }
+  onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+
+  var spyLinks = [].slice.call(document.querySelectorAll('[data-spy]'));
+  var sections = spyLinks.map(function(l){ return document.getElementById(l.getAttribute('data-spy')); });
+  if('IntersectionObserver' in window){
+    var spy = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          spyLinks.forEach(function(l){ l.classList.toggle('active', l.getAttribute('data-spy') === e.target.id); });
+        }
+      });
+    }, {rootMargin:'-45% 0px -50% 0px', threshold:0});
+    sections.forEach(function(s){ if(s) spy.observe(s); });
+  }
+
+  /* ---- mobile menu ---- */
+  var toggle = document.getElementById('navToggle');
+  var menu = document.getElementById('mobileMenu');
+  toggle.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  menu.addEventListener('click', function(e){
+    if(e.target.tagName === 'A'){
+      menu.classList.remove('open');
+      toggle.setAttribute('aria-expanded','false');
+    }
+  });
+
+  /* ---- FAQ accordion ---- */
+  [].forEach.call(document.querySelectorAll('.faq-item'), function(item){
+    var btn = item.querySelector('.faq-q');
+    var panel = item.querySelector('.faq-a');
+    btn.addEventListener('click', function(){
+      var open = item.classList.contains('open');
+      [].forEach.call(document.querySelectorAll('.faq-item.open'), function(o){
+        if(o !== item){
+          o.classList.remove('open');
+          o.querySelector('.faq-q').setAttribute('aria-expanded','false');
+          o.querySelector('.faq-a').style.maxHeight = null;
+        }
+      });
+      if(open){
+        item.classList.remove('open');
+        btn.setAttribute('aria-expanded','false');
+        panel.style.maxHeight = null;
+      } else {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded','true');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+      }
+    });
+  });
+  window.addEventListener('resize', function(){
+    [].forEach.call(document.querySelectorAll('.faq-item.open .faq-a'), function(p){ p.style.maxHeight = p.scrollHeight + 'px'; });
+  });
+
+  /* ---- reveal on scroll ---- */
+  var reveals = [].slice.call(document.querySelectorAll('.reveal'));
+  if('IntersectionObserver' in window){
+    var ro = new IntersectionObserver(function(entries){
+      entries.forEach(function(e, i){
+        if(e.isIntersecting){
+          var el = e.target;
+          el.style.transitionDelay = Math.min(i * 60, 180) + 'ms';
+          el.classList.add('in');
+          ro.unobserve(el);
+        }
+      });
+    }, {rootMargin:'0px 0px -8% 0px', threshold:.08});
+    reveals.forEach(function(el){ ro.observe(el); });
+  } else { reveals.forEach(function(el){ el.classList.add('in'); }); }
+
+  /* ---- duplicate marquee for a seamless loop ---- */
+  var track = document.getElementById('track');
+  if(track){ track.innerHTML += track.innerHTML; }
+
+  /* ---- year ---- */
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
