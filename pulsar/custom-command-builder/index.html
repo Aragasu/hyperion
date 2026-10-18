@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Custom command builder | Pulsar</title>
+<meta name="description" content="Write a Pulsar custom command with variables, see it rendered, and copy the exact p!cc add line. Runs entirely in your browser.">
+<link rel="icon" href="../../pulsar-avatar.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --ink:#f5f5f6; --ink-2:#a6a6ad; --ink-3:#8b8b92;
+  --line:rgba(255,255,255,.10); --line-2:rgba(255,255,255,.055);
+  --surface:rgba(255,255,255,.028); --surface-2:rgba(255,255,255,.055);
+  --ok:#7ee2b8; --bad:#f79b9b;
+  --r-md:16px; --r-lg:22px; --r-full:999px;
+  --maxw:1160px; --ease:cubic-bezier(.16,1,.3,1);
+  --font-display:"Outfit","Inter",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--font-body);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(900px 520px at 50% -180px,rgba(255,255,255,.06),transparent 70%),
+             radial-gradient(620px 460px at 96% 10%,rgba(255,255,255,.022),transparent 62%);
+}
+::selection{background:#fff;color:#0a0a0b}
+:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:6px}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button{font:inherit;color:inherit}
+*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border:3px solid var(--bg);border-radius:99px}
+
+.wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 24px;position:relative;z-index:2}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:fixed;top:12px;left:12px;z-index:200;transform:translateY(-200%);background:#fff;color:#0a0a0b;padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px}
+.skip:focus{transform:none}
+
+h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:-0.03em;line-height:1.04;margin:0}
+.mono{font-family:var(--font-mono);font-weight:500;letter-spacing:.02em}
+.muted{color:var(--ink-3)}
+
+.top{border-bottom:1px solid var(--line-2);position:sticky;top:0;z-index:50;background:rgba(10,10,11,.78);backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px)}
+.top-in{display:flex;align-items:center;gap:14px;height:64px}
+.brand{display:flex;align-items:center;gap:11px;font-family:var(--font-display);font-weight:700;font-size:1.04rem;letter-spacing:-0.02em}
+.brand .mark{width:32px;height:32px;border-radius:9px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2);flex:none}
+.brand .mark img{width:100%;height:100%;object-fit:cover}
+.bot-pill{font-family:var(--font-mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;background:#fff;color:#0a0a0b;border-radius:4px;padding:.12rem .32rem}
+.top-nav{margin-left:auto;display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.top-nav a{padding:.46rem .76rem;border-radius:var(--r-full);font-size:.88rem;color:var(--ink-2);transition:color .25s,background .25s}
+.top-nav a:hover{color:var(--ink);background:var(--surface)}
+.top-nav a.on{color:var(--ink);background:var(--surface-2)}
+.top-nav a.back{color:var(--ink-3)}
+@media (max-width:640px){
+  .top-in{height:auto;min-height:60px;padding-block:8px;flex-wrap:wrap}
+  .top-nav{width:100%;justify-content:flex-start;margin-left:0}
+  .top-nav a{padding:.4rem .54rem;font-size:.82rem}
+  .brand span.bot-pill{display:none}
+  .hero{padding-left:18px;padding-right:18px}
+}
+
+.hero{padding:clamp(44px,7vw,76px) 24px 10px}
+.eyebrow{display:inline-flex;align-items:center;gap:.55rem;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.eyebrow .sig{width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}70%{box-shadow:0 0 0 9px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+.hero h1{font-size:clamp(2.1rem,5vw,3.4rem);letter-spacing:-0.04em;margin-top:16px}
+.hero p{margin-top:18px;color:var(--ink-2);max-width:70ch;font-size:clamp(1rem,1.4vw,1.12rem)}
+.hero p a{border-bottom:1px solid var(--line);color:var(--ink)}
+
+main{padding:38px 0 80px}
+.grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:18px;align-items:start}
+@media (max-width:960px){.grid{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:clamp(20px,2.6vw,26px);position:relative}
+.card + .card{margin-top:16px}
+.card h2{font-size:1.06rem;letter-spacing:-0.02em;display:flex;align-items:center;gap:10px}
+.card h2 .n{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.12em;color:var(--ink-3);border:1px solid var(--line-2);border-radius:5px;padding:.14rem .38rem}
+.hint{margin-top:7px;color:var(--ink-3);font-size:.86rem;max-width:62ch}
+label{display:block;margin:16px 0 6px;font-family:var(--font-mono);font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+input[type=text],textarea{
+  width:100%;background:rgba(0,0,0,.28);border:1px solid var(--line);color:var(--ink);
+  border-radius:12px;padding:11px 13px;font:inherit;font-size:.94rem;outline:none;
+  transition:border-color .25s,background .25s;
+}
+textarea{min-height:168px;resize:vertical;font-family:var(--font-mono);font-size:.88rem;line-height:1.62}
+input[type=text]:focus,textarea:focus{border-color:rgba(255,255,255,.32);background:rgba(0,0,0,.38)}
+input::placeholder,textarea::placeholder{color:var(--ink-3)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.row{grid-template-columns:1fr}}
+.counter{margin-top:5px;text-align:right;font-family:var(--font-mono);font-size:.68rem;color:var(--ink-3)}
+.counter.over{color:var(--bad)}
+
+.palette{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.chip{
+  border:1px solid var(--line);background:rgba(0,0,0,.24);color:var(--ink-2);border-radius:var(--r-full);
+  padding:.34rem .64rem;font-family:var(--font-mono);font-size:.72rem;cursor:pointer;
+  transition:border-color .2s,color .2s,background .2s;
+}
+.chip:hover{border-color:rgba(255,255,255,.3);color:var(--ink);background:var(--surface-2)}
+.chip:active{transform:translateY(1px)}
+
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:.7rem 1.1rem;border-radius:var(--r-full);
+  border:1px solid transparent;font-weight:600;font-size:.9rem;cursor:pointer;
+  transition:transform .3s var(--ease),background .3s,border-color .3s,box-shadow .3s}
+.btn svg{width:16px;height:16px;flex:none}
+.btn-primary{background:#fff;color:#0a0a0b}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 30px -12px rgba(255,255,255,.5)}
+.btn-ghost{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.btn-ghost:hover{background:var(--surface-2);border-color:rgba(255,255,255,.24)}
+
+.status{min-height:22px;margin-top:12px;font-size:.83rem;color:var(--ink-3);line-height:1.5}
+.status.good{color:var(--ok)}
+.status.bad{color:var(--bad)}
+.status code{font-family:var(--font-mono);font-size:.94em;background:rgba(255,255,255,.06);border:1px solid var(--line-2);border-radius:5px;padding:.04rem .3rem}
+
+.preview{
+  border:1px solid var(--line);border-radius:var(--r-md);background:rgba(0,0,0,.32);
+  padding:15px 16px;min-height:132px;white-space:pre-wrap;word-break:break-word;
+  font-size:.94rem;line-height:1.62;color:var(--ink-2)
+}
+.preview .mention{color:var(--ink);background:var(--surface-2);border-radius:5px;padding:.05rem .3rem}
+.preview .chan{color:var(--ink);border-bottom:1px solid var(--line)}
+.preview.empty{color:var(--ink-3)}
+
+.out{
+  border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.4);
+  padding:13px 14px;font-family:var(--font-mono);font-size:.8rem;line-height:1.62;color:var(--ink);
+  white-space:pre-wrap;word-break:break-word;max-height:250px;overflow:auto;user-select:all
+}
+.out + .out{margin-top:10px}
+.out .p{color:var(--ink-3)}
+.out .kill{color:var(--ink-3)}
+.out-lbl{display:flex;align-items:center;gap:9px;margin:16px 0 6px;font-family:var(--font-mono);
+  font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+.copy-mini{margin-left:auto;border:1px solid var(--line);background:transparent;color:var(--ink-3);
+  font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:var(--r-full);padding:.24rem .56rem;cursor:pointer}
+.copy-mini:hover{color:var(--ink);border-color:rgba(255,255,255,.3)}
+
+details{margin-top:18px;border-top:1px solid var(--line-2);padding-top:14px}
+summary{cursor:pointer;color:var(--ink-3);font-size:.84rem}
+summary:hover{color:var(--ink-2)}
+details ul{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+details li{display:grid;grid-template-columns:150px 1fr;gap:12px;font-size:.82rem;color:var(--ink-2)}
+details li code{font-family:var(--font-mono);font-size:.78rem;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line-2);border-radius:5px;padding:.08rem .34rem;justify-self:start;white-space:nowrap}
+@media (max-width:560px){details li{grid-template-columns:1fr;gap:3px}}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);z-index:150;
+  background:#fff;color:#0a0a0b;padding:11px 18px;border-radius:var(--r-full);font-weight:600;font-size:.88rem;
+  display:flex;align-items:center;gap:9px;box-shadow:0 20px 50px -18px rgba(0,0,0,.9);
+  transition:transform .5s var(--ease)}
+.toast.show{transform:translate(-50%,0)}
+.toast svg{width:16px;height:16px}
+
+.foot{border-top:1px solid var(--line-2);padding:34px 0 44px;color:var(--ink-3);font-size:.8rem;position:relative;z-index:2}
+.foot-in{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+.foot a{border-bottom:1px solid var(--line);color:var(--ink-2)}
+.foot a:hover{color:#fff}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="../../">
+      <span class="mark"><img src="../../pulsar-avatar.png" alt=""></span>
+      Pulsar <span class="bot-pill">Bot</span>
+    </a>
+    <nav class="top-nav" aria-label="Breadcrumb">
+      <a class="on" href="./" aria-current="page">Command builder</a>
+      <a href="../embed-builder/">Embed builder</a>
+      <a class="back" href="../">&larr; Pulsar</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <span class="eyebrow"><span class="sig" aria-hidden="true"></span>Pulsar · no dashboard</span>
+  <h1>Custom command builder</h1>
+  <p>Write a response, drop in variables, and copy one line into a channel Pulsar reads. The page is a local tool: it makes no requests and sends nothing anywhere — the command it produces is yours to paste.</p>
+</div>
+
+<main id="main">
+  <div class="wrap grid">
+    <div>
+      <section class="card">
+        <h2><span class="n">01</span>The command</h2>
+        <p class="hint">The name is what people type after the prefix. Up to 32 characters: lowercase letters, numbers, <span class="mono">-</span> and <span class="mono">_</span>.</p>
+
+        <div class="row">
+          <div>
+            <label for="name">Name</label>
+            <input id="name" type="text" placeholder="rules" maxlength="32" autocomplete="off" spellcheck="false">
+          </div>
+          <div>
+            <label for="aliases">Aliases <span class="muted" style="text-transform:none;letter-spacing:0">(optional, up to 3)</span></label>
+            <input id="aliases" type="text" placeholder="readme, info" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+
+        <label for="response">Response</label>
+        <textarea id="response" maxlength="4000" placeholder="Welcome {user} to {server}! We are {server.member_count} people — read {channel} before posting."></textarea>
+        <div class="counter" id="counter">0 / 4000</div>
+
+        <label id="paletteLabel">Variables — click to insert</label>
+        <div class="palette" id="palette" role="group" aria-labelledby="paletteLabel"></div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="copy" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.4"/><path d="M5.5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v.5"/></svg>
+            Copy the command
+          </button>
+          <button class="btn btn-ghost" id="example" type="button">Load an example</button>
+          <button class="btn btn-ghost" id="clear" type="button">Clear</button>
+        </div>
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+
+        <details>
+          <summary>What each variable does, and the limits</summary>
+          <ul id="varhelp"></ul>
+        </details>
+      </section>
+    </div>
+
+    <div>
+      <section class="card">
+        <h2><span class="n">02</span>Preview</h2>
+        <p class="hint">Rendered with sample values so you can see the shape. A token the bot cannot fill stays exactly as typed.</p>
+        <div class="preview empty" id="preview"></div>
+      </section>
+
+      <section class="card">
+        <h2><span class="n">03</span>Paste this in Pulsar</h2>
+        <p class="hint">Needs <b style="color:var(--ink);font-weight:500">Manage server</b>. The response becomes one line: the command joins the words, so line breaks turn into spaces.</p>
+
+        <div class="out-lbl">Add it
+          <button class="copy-mini" id="copyAdd" type="button">Copy</button>
+        </div>
+        <div class="out" id="outAdd"></div>
+
+        <div id="aliasBlock" hidden>
+          <div class="out-lbl">Then the aliases
+            <button class="copy-mini" id="copyAlias" type="button">Copy</button>
+          </div>
+          <div class="out" id="outAlias"></div>
+        </div>
+
+        <div class="status" id="copyStatus" role="status" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <span>Custom commands live per server: 50 of them, 4,000 characters each. <a href="../#commands">See every command</a>.</span>
+    <span class="mono">Nothing leaves this page.</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
+  <span id="toastMsg">Copied</span>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* Every canonical command name, straight from the bot's registry. A custom
+     command may not take one of these, or a real command would be shadowed. */
+  var RESERVED = ["20q", "21", "8ball", "about", "access", "achievement", "addbot", "addchannel", "advancement", "afk", "age", "aki", "akinator", "alive", "announce", "answer", "antiraid", "atbash", "attachscan", "auditlog", "automod", "automoderation", "avatar", "bal", "balance", "ballot", "baltop", "ban", "banlist", "banned", "bans", "base64", "battle", "beg", "bet", "bill", "bin", "binary", "birthday", "bj", "blackjack", "bmi", "bodymass", "bonk", "boogie", "botstats", "burn", "c4", "caesar", "calc", "calculate", "canido", "card", "case", "casefile", "cases", "casing", "cat", "catto", "cc", "challenge", "channel", "channelinfo", "checksum", "choose", "cinfo", "claim", "clear", "clock", "cmds", "coin", "coinflip", "coins", "color", "colour", "commandlist", "commands", "compliment", "compliments", "conch", "connect4", "connectfour", "conversion", "convert", "cookie", "count", "count-text", "counters", "counting", "createchannel", "customcmd", "customcommand", "customcommands", "d", "dad", "dadjoke", "daily", "dance", "deals", "dedupe", "deduplicate", "define", "delchannel", "deletechannel", "dice", "dice-roll", "dict", "dictionary", "digest", "dm", "dog", "doggo", "duel", "eightball", "embed", "emojify", "emojiletters", "enter", "epicgames", "fact", "fatherok", "features", "fight", "filescan", "flip", "fortune", "fortunecookie", "freegame", "freegames", "gamble", "gamdeal", "gamedeals", "gamestatus", "genpass", "genter", "getbot", "giveaway", "givecoins", "greeter", "gstart", "guessnumber", "guid", "guildinfo", "gw", "hack", "hacker", "hangman", "hash", "headpat", "help", "hex", "hide", "high5", "higherlower", "highfive", "history", "hm", "honeypot", "horoscope", "howold", "hug", "humanbarometer", "id", "info", "inspiration", "inspire", "invite", "join-giveaway", "joke", "json", "jsonformat", "jwt", "jwtdecode", "kick", "kiss", "kitty", "level", "levels", "leveltop", "links", "lock", "lockdown", "logs", "magic8", "magicconch", "mass", "massban", "masskick", "massrole", "math", "mcprofile", "mcskin", "mcstatus", "mediascan", "membercount", "members", "meme", "memegen", "minecraftstatus", "mix", "mock", "modcase", "mode", "modlog", "module", "modules", "moneytop", "morse", "morsecode", "motivate", "mute", "neverhaveiever", "newchannel", "nhie", "nick", "nickname", "numberguess", "numeral", "onlyme", "order", "owo", "password", "pat", "pay", "permissions", "perms", "pfp", "pick", "pickup", "pickupline", "pin", "ping", "player", "playerlookup", "poll", "prettyprint", "price", "privatemode", "profile", "prune", "publicmode", "pun", "puns", "puppy", "purge", "qr", "quiz", "quote", "quotes", "raid", "rand", "random", "randomize", "rank", "rate", "reactionrole", "reactionroles", "reason", "regex", "regexp", "remind", "reminder", "removechannel", "retest", "rich", "richest", "riddle", "rizz", "rizzcheck", "rizzline", "rng", "roast", "rob", "rockpaperscissors", "role", "role-info", "roleinfo", "roles", "roll", "roman", "romanize", "rot", "roulette", "rps", "rr", "say", "sayembed", "scanner", "schedule", "scheduled", "server", "serverinfo", "serverstats", "serverstatus", "shift", "shiftcipher", "ship", "shuffle", "site", "slap", "slot", "slots", "slowmode", "slug", "slugify", "snowflake", "sort", "split", "spongebob", "stars", "statchannels", "stats", "status", "steal", "sticky", "stickyadd", "tag", "tags", "tarot", "tarotcard", "temprole", "temproles", "text", "ticket", "tickets", "tictactoe", "time", "timeout", "timerole", "timestamp", "tip", "tod", "toggleusage", "toggleuseage", "transfer", "trap", "trivia", "truthordare", "ttt", "twentyquestions", "unban", "unhide", "unique", "unit", "units", "unlock", "unpin", "uptime", "url", "urlencode", "userinfo", "uuid", "uwu", "vote", "vote-poll", "wallet", "wanted", "wantedposter", "warn", "warnings", "warns", "watchdog", "wc", "website", "welcome", "welcomer", "whois", "wordcount", "wordgame", "wordle", "work", "wouldyourather", "wyr", "xp", "xptop", "zodiac"];
+
+  var VARIABLES = [
+    ["{user}", "mentions whoever ran it"],
+    ["{user.name}", "their display name"],
+    ["{user.username}", "their @username"],
+    ["{user.id}", "their user id"],
+    ["{server}", "the server name"],
+    ["{server.member_count}", "how many people are in it"],
+    ["{channel}", "links the channel it was run in"],
+    ["{channel.name}", "that channel’s name"],
+    ["{args}", "everything typed after the command"],
+    ["{args.1}", "the first word of it, through {args.9}"],
+    ["{prefix}", "the bot’s prefix"],
+    ["{date}", "today’s date (UTC)"],
+    ["{time}", "the time (UTC)"],
+    ["{random.1-100}", "a random number in a range"]
+  ];
+
+  var SAMPLE = {
+    user: "@Robin",
+    "user.name": "Robin",
+    "user.username": "@robin",
+    "user.id": "3f0c1a2b",
+    server: "Pulsar HQ",
+    "server.member_count": "128",
+    channel: "#general",
+    "channel.name": "general",
+    args: "pizza tacos burgers",
+    "args.1": "pizza",
+    "args.2": "tacos",
+    "args.3": "burgers",
+    prefix: "p!",
+    date: new Date().toISOString().slice(0,10),
+    time: new Date().toISOString().slice(11,16) + " UTC"
+  };
+
+  var $ = function(id){ return document.getElementById(id); };
+  var nameInput = $("name");
+  var aliasInput = $("aliases");
+  var response = $("response");
+  var preview = $("preview");
+  var outAdd = $("outAdd");
+  var outAlias = $("outAlias");
+  var aliasBlock = $("aliasBlock");
+  var status = $("status");
+  var copyStatus = $("copyStatus");
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(ch){
+      return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch];
+    });
+  }
+
+  function renderPreview(text){
+    if(!text.trim()) return "";
+    var filled = text.replace(/\{([a-z0-9_.-]+)\}/gi, function(whole, token){
+      var key = token.toLowerCase();
+      if(Object.prototype.hasOwnProperty.call(SAMPLE, key)) return SAMPLE[key];
+      if(key.indexOf("random.") === 0){
+        var range = /^(\d{1,9})-(\d{1,9})$/.exec(key.slice(7));
+        if(range){
+          var low = Number(range[1]), high = Number(range[2]);
+          if(high >= low) return String(low + Math.floor(Math.random() * (high - low + 1)));
+        }
+      }
+      return whole;
+    });
+    return escapeHtml(filled)
+      .replace(/@[\w.]+/g, function(m){ return '<span class="mention">' + m + "</span>"; })
+      .replace(/#[\w-]+/g, function(m){ return '<span class="chan">' + m + "</span>"; });
+  }
+
+  function parseAliases(){
+    return aliasInput.value.split(/[\s,]+/).map(function(a){ return a.trim().toLowerCase(); }).filter(Boolean);
+  }
+
+  /* The command itself joins its words, so a template with line breaks arrives
+     on one line. Showing that here is the whole point of a preview. */
+  function oneLine(text){
+    return text.replace(/\s+/g, " ").trim();
+  }
+
+  function addLine(){
+    var name = nameInput.value.trim() || "<name>";
+    var body = oneLine(response.value) || "<response>";
+    return "p!cc add " + name + " " + body;
+  }
+
+  function aliasLine(){
+    var name = nameInput.value.trim();
+    var aliases = parseAliases();
+    if(!name || !aliases.length) return "";
+    return "p!cc alias " + name + " " + aliases.join(" ");
+  }
+
+  function validate(){
+    var name = nameInput.value.trim().toLowerCase();
+    var body = response.value.trim();
+    var problems = [];
+
+    if(!name) problems.push("the command needs a name");
+    else if(!/^[a-z0-9_-]{1,32}$/.test(name)) problems.push("the name must be 1–32 lowercase letters, numbers, - or _");
+    else if(RESERVED.indexOf(name) !== -1) problems.push("“" + name + "” is already a real command, so it cannot be replaced");
+
+    if(!body) problems.push("the response is empty");
+    else if(response.value.length > 4000) problems.push("the response is over 4,000 characters");
+    else {
+      var opens = (body.replace(/\{\{/g, "").match(/\{/g) || []).length;
+      var closes = (body.replace(/\}\}/g, "").match(/\}/g) || []).length;
+      if(opens !== closes) problems.push("a { has no matching } — use {{ and }} for literal braces");
+    }
+
+    var aliases = parseAliases();
+    if(aliases.length > 3) problems.push("at most 3 aliases");
+    for(var i = 0; i < aliases.length; i += 1){
+      var alias = aliases[i];
+      if(!/^[a-z0-9_-]{1,32}$/.test(alias)) problems.push("“" + alias + "” is not a valid alias");
+      else if(alias === name) problems.push("an alias cannot repeat the name");
+      else if(RESERVED.indexOf(alias) !== -1) problems.push("“" + alias + "” is already a real command");
+      else if(aliases.indexOf(alias) !== i) problems.push("“" + alias + "” is listed twice");
+    }
+
+    if(problems.length){
+      status.className = "status bad";
+      status.textContent = "Fix: " + problems.join(" · ") + ".";
+    } else {
+      status.className = "status good";
+      status.textContent = aliases.length
+        ? "Ready — two lines to paste, the command and its aliases."
+        : "Ready to copy.";
+    }
+    return problems.length === 0;
+  }
+
+  function update(){
+    var length = response.value.length;
+    var counter = $("counter");
+    counter.textContent = length + " / 4000";
+    counter.className = "counter" + (length > 4000 ? " over" : "");
+
+    var html = renderPreview(response.value);
+    preview.innerHTML = html || "";
+    preview.className = "preview" + (html ? "" : " empty");
+    if(!html) preview.textContent = "The rendered command appears here.";
+
+    outAdd.textContent = addLine();
+    var aliases = aliasLine();
+    outAlias.textContent = aliases;
+    aliasBlock.hidden = !aliases;
+
+    validate();
+    save();
+  }
+
+  function insert(token){
+    var start = response.selectionStart == null ? response.value.length : response.selectionStart;
+    var end = response.selectionEnd == null ? start : response.selectionEnd;
+    response.value = response.value.slice(0, start) + token + response.value.slice(end);
+    response.focus();
+    response.setSelectionRange(start + token.length, start + token.length);
+    update();
+  }
+
+  function save(){
+    try{
+      localStorage.setItem("pulsar.commandDraft", JSON.stringify({
+        name: nameInput.value,
+        aliases: aliasInput.value,
+        response: response.value
+      }));
+    }catch(e){ /* private mode: the page still works */ }
+  }
+
+  function load(){
+    try{
+      var draft = JSON.parse(localStorage.getItem("pulsar.commandDraft") || "null");
+      if(!draft) return;
+      nameInput.value = draft.name || "";
+      aliasInput.value = draft.aliases || "";
+      response.value = draft.response || "";
+    }catch(e){ /* a bad draft is not worth a broken page */ }
+  }
+
+  var toast = $("toast"), toastMsg = $("toastMsg"), toastTimer;
+  function showToast(msg){
+    toastMsg.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove("show"); }, 2100);
+  }
+
+  function copy(text, okMsg){
+    if(!text){ showToast("Nothing to copy yet"); return; }
+    function done(){ showToast(okMsg); }
+    function fallback(){
+      var t = document.createElement("textarea");
+      t.value = text;
+      t.setAttribute("readonly", "");
+      t.style.position = "absolute";
+      t.style.left = "-9999px";
+      document.body.appendChild(t);
+      t.select();
+      try{ if(document.execCommand("copy")) done(); else showToast("Copy failed — select it by hand"); }
+      catch(e){ showToast("Copy failed — select it by hand"); }
+      document.body.removeChild(t);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  }
+
+  /* Palette and reference share one source, so a token cannot be documented in
+     one place and missing from the other. */
+  VARIABLES.forEach(function(pair){
+    var chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.textContent = pair[0];
+    chip.title = pair[1];
+    chip.addEventListener("click", function(){ insert(pair[0]); });
+    $("palette").appendChild(chip);
+
+    var item = document.createElement("li");
+    item.innerHTML = "<code>" + escapeHtml(pair[0]) + "</code><span>" + escapeHtml(pair[1]) + "</span>";
+    $("varhelp").appendChild(item);
+  });
+
+  nameInput.addEventListener("input", function(){
+    nameInput.value = nameInput.value.toLowerCase().replace(/\s+/g, "-");
+    update();
+  });
+  response.addEventListener("input", update);
+  aliasInput.addEventListener("input", update);
+
+  $("copy").addEventListener("click", function(){
+    if(!validate()){
+      copyStatus.className = "status bad";
+      copyStatus.textContent = "Fix the problem above first — anything pasted now would be refused.";
+      return;
+    }
+    var lines = [addLine()];
+    var aliases = aliasLine();
+    if(aliases) lines.push(aliases);
+    copy(lines.join("\n"), "Copied. Paste it into a channel where Pulsar listens.");
+  });
+  $("copyAdd").addEventListener("click", function(){ copy(addLine(), "Copied the command."); });
+  $("copyAlias").addEventListener("click", function(){ copy(aliasLine(), "Copied the aliases."); });
+
+  $("example").addEventListener("click", function(){
+    nameInput.value = "rules";
+    aliasInput.value = "readme";
+    response.value = "Welcome {user} to {server}! We are {server.member_count} people. Read {channel} before posting, and try {prefix}help if you are new.";
+    update();
+  });
+
+  $("clear").addEventListener("click", function(){
+    nameInput.value = "";
+    aliasInput.value = "";
+    response.value = "";
+    copyStatus.textContent = "";
+    update();
+  });
+
+  load();
+  update();
+})();
+</script>
+</body>
+</html>
