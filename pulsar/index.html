@@ -457,6 +457,9 @@ section{position:relative;z-index:2}
 .foot-col a:hover{color:#fff}
 .foot-bot{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-top:52px;padding-top:24px;border-top:1px solid var(--line-2);color:var(--ink-3);font-size:.8rem}
 .foot-bot .mono{font-size:.76rem}
+.foot-legal{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.foot-legal a{color:var(--ink-3);transition:color .25s}
+.foot-legal a:hover{color:var(--ink)}
 
 /* ---------- toast ---------- */
 .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,140%);z-index:150;
@@ -1273,6 +1276,11 @@ section{position:relative;z-index:2}
     </div>
     <div class="foot-bot">
       <span>© <span id="year">2026</span> Pulsar · made for Hyperion. Not affiliated with Yapper.</span>
+      <nav class="foot-legal" aria-label="Legal">
+        <a href="terms/">Terms</a>
+        <a href="privacy/">Privacy</a>
+        <a href="licenses/">Licenses</a>
+      </nav>
       <span class="mono">Signal acquired.</span>
     </div>
   </div>
